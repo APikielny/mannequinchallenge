@@ -174,8 +174,8 @@ class HourglassModel(nn.Module):
 
     def forward(self, input_):
 
-        visualize = True
-        if (visualize):
+        bVisualize = True
+        if (bVisualize):
             visualize()
 
         pred_feature = self.seq(input_)
