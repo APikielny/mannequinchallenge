@@ -173,7 +173,10 @@ class HourglassModel(nn.Module):
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
     def forward(self, input_):
-        print("hit hourglass forward")
+
+        visualize = True
+        if (visualize):
+            visualize()
 
         pred_feature = self.seq(input_)
 
@@ -181,3 +184,8 @@ class HourglassModel(nn.Module):
         pred_confidence = self.uncertainty_layer(pred_feature)
 
         return pred_d, pred_confidence
+
+    def visualize():
+        print("visualizing!!")
+
+        return
