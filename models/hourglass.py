@@ -173,6 +173,8 @@ class HourglassModel(nn.Module):
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
     def forward(self, input_):
+        print("hit hourglass forward")
+
         pred_feature = self.seq(input_)
 
         pred_d = self.pred_layer(pred_feature)
