@@ -172,6 +172,11 @@ class HourglassModel(nn.Module):
         self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
+    def visualize():
+        print("visualizing!!")
+
+        return
+
     def forward(self, input_):
 
         bVisualize = True
@@ -184,8 +189,3 @@ class HourglassModel(nn.Module):
         pred_confidence = self.uncertainty_layer(pred_feature)
 
         return pred_d, pred_confidence
-
-    def visualize():
-        print("visualizing!!")
-
-        return
