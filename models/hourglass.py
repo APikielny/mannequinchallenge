@@ -183,7 +183,7 @@ class HourglassModel(nn.Module):
 
         boolVisualize = True
         if (boolVisualize):
-            self.visualize()
+            self.visualize(input_)
 
         pred_feature = self.seq(input_)
 
