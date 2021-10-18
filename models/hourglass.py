@@ -202,6 +202,8 @@ class HourglassModel(nn.Module):
             # plt.imshow(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
             # plt.show()
 
+            #test commit
+
             cv2.imwrite("latent_images/img.png", list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
             
 
