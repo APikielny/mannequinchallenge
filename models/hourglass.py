@@ -57,8 +57,8 @@ class inception(nn.Module):
 visualisation = {}
 
 def hook_fn(m, i, o):
-    print("registered")
-    visualisation[m] = o 
+    print("registered hook with o = ", o)
+    visualisation[m] = o
 
 class Channels1(nn.Module):
     def __init__(self):
