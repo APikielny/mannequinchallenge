@@ -81,9 +81,8 @@ class Channels1(nn.Module):
             )
         )  # EEE
 
-        # self.list[0].register_forward_hook(hook_fn)
-
-        print("lsit 0: ", self.list[0])
+        for layer in self.list:
+            layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
@@ -196,13 +195,13 @@ class HourglassModel(nn.Module):
 
     def forward(self, input_):
 
-        boolVisualize = True
-        if (boolVisualize):
-            self.visualize(input_)
-
         pred_feature = self.seq(input_)
 
         pred_d = self.pred_layer(pred_feature)
         pred_confidence = self.uncertainty_layer(pred_feature)
+
+        boolVisualize = True
+        if (boolVisualize):
+            self.visualize(input_)
 
         return pred_d, pred_confidence
