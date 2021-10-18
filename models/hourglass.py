@@ -193,7 +193,7 @@ class HourglassModel(nn.Module):
             print(self.seq)
         
         if(view_feature_maps):
-            print(len(visualisation_feature_map))
+            print("length: ", len(visualisation_feature_map))
 
         return
 
