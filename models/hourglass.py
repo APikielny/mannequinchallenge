@@ -64,14 +64,11 @@ class Channels1(nn.Module):
     def __init__(self):
         super(Channels1, self).__init__()
 
-        self.latent = inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]) #TODO not sure which is latent
-
         self.list = nn.ModuleList()
         self.list.append(
             nn.Sequential(
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                self.latent
-                # inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])
+                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])
             )
         )  # EE
         self.list.append(
@@ -84,7 +81,9 @@ class Channels1(nn.Module):
             )
         )  # EEE
 
-        self.latent.register_forward_hook(hook_fn)
+        # self.list[0].register_forward_hook(hook_fn)
+
+        print("lsit 0: ", self.list[0])
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
