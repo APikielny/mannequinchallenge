@@ -6,3 +6,4 @@ test_data/DAVIS*
 test_data/tum*
 test_data/viz_predictions*
 latent_images/
+.DS_Store
