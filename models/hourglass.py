@@ -54,6 +54,11 @@ class inception(nn.Module):
             ret.append(conv(x))
         return torch.cat(ret, dim=1)
 
+visualisation = {}
+
+def hook_fn(m, i, o):
+    print("registered")
+    visualisation[m] = o 
 
 class Channels1(nn.Module):
     def __init__(self):
@@ -74,6 +79,8 @@ class Channels1(nn.Module):
                 nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # EEE
+
+        self.list[0].register_forward_hook(hook_fn)
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
@@ -173,9 +180,14 @@ class HourglassModel(nn.Module):
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
     def visualize(self, input_):
+        #options
+        visualize_model_arch = False
+
         print("visualizing!!")
         # pred_feature = self.seq(input_)
-        print(self.seq)
+
+        if(visualize_model_arch):
+            print(self.seq)
 
         return
 
