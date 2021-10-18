@@ -47,7 +47,7 @@ save_path = 'test_data/viz_predictions/'
 print('save_path %s' % save_path)
 
 for i, data in enumerate(video_dataset):
-    print(i)
+    # print(i)
     stacked_img = data[0]
     targets = data[1]
-    model.run_and_save_DAVIS(stacked_img, targets, save_path)
+    model.run_and_save_DAVIS(stacked_img, targets, save_path, i)

@@ -17,6 +17,7 @@ import torch.nn as nn
 
 import matplotlib.pyplot as plt
 import cv2
+import os
 
 
 class inception(nn.Module):
@@ -184,7 +185,7 @@ class HourglassModel(nn.Module):
         self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
-    def visualize(self, input_):
+    def visualize(self, input_, input_num):
         #options
         visualize_model_arch = False
         view_feature_maps = True
@@ -199,15 +200,16 @@ class HourglassModel(nn.Module):
             # print("length: ", len(visualisation_feature_map))
             # print(visualisation_feature_map.keys())
             # print(list(visualisation_feature_map.values())[0][0,0,:,:].shape)
-            # plt.imshow(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
-            # plt.show()
 
-            cv2.imwrite("latent_images/img.png", list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
+            cv2.imwrite(os.path.join("latent_images", "img" + str(input_num) + ".png"), list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy() * 255)
+            print(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
             
 
         return
 
-    def forward(self, input_):
+    def forward(self, input_, input_num):
+
+        print("i", input_num)
 
         pred_feature = self.seq(input_)
 
@@ -216,6 +218,6 @@ class HourglassModel(nn.Module):
 
         boolVisualize = True
         if (boolVisualize):
-            self.visualize(input_)
+            self.visualize(input_, input_num)
 
         return pred_d, pred_confidence
