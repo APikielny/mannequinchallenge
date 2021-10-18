@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 
 import matplotlib.pyplot as plt
+import cv2
 
 
 class inception(nn.Module):
@@ -198,8 +199,10 @@ class HourglassModel(nn.Module):
             # print("length: ", len(visualisation_feature_map))
             # print(visualisation_feature_map.keys())
             # print(list(visualisation_feature_map.values())[0][0,0,:,:].shape)
-            plt.imshow(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
-            plt.show()
+            # plt.imshow(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
+            # plt.show()
+
+            cv2.imwrite("latent_images/img.png", list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
             
 
         return
