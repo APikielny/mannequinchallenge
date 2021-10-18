@@ -54,11 +54,11 @@ class inception(nn.Module):
             ret.append(conv(x))
         return torch.cat(ret, dim=1)
 
-visualisation = {}
+visualisation_feature_map = {}
 
 def hook_fn(m, i, o):
-    print("registered hook with o = ", o)
-    visualisation[m] = o
+    # print("registered hook with o = ", o)
+    visualisation_feature_map[m] = o
 
 class Channels1(nn.Module):
     def __init__(self):
@@ -184,12 +184,16 @@ class HourglassModel(nn.Module):
     def visualize(self, input_):
         #options
         visualize_model_arch = False
+        view_feature_maps = True
 
-        print("visualizing!!")
+        # print("visualizing!!")
         # pred_feature = self.seq(input_)
 
         if(visualize_model_arch):
             print(self.seq)
+        
+        if(view_feature_maps):
+            print(len(visualisation_feature_map))
 
         return
 
