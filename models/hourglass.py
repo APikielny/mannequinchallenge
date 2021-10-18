@@ -194,7 +194,8 @@ class HourglassModel(nn.Module):
         
         if(view_feature_maps):
             # print("length: ", len(visualisation_feature_map))
-            print(visualisation_feature_map.keys())
+            # print(visualisation_feature_map.keys())
+            print(visualisation_feature_map[visualisation_feature_map.keys()[0]])
 
         return
 
