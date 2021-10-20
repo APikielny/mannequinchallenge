@@ -185,6 +185,30 @@ class HourglassModel(nn.Module):
         self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
+    def visualize_layer(self, latent):
+        ################################### PCA
+        (U,S,V) = torch.pca_lowrank(torch.reshape(latent, (36, 64, 256)), q=None, center=True, niter=2)
+
+
+        k = 3
+
+        # print("U shape: ", U.shape)
+        # print("S shape: ", S.shape)
+        # print("V shape: ", V.shape)
+
+        # projected = torch.matmul(latent, V[:, :, :k])
+        projected = U[:,:,:3]
+
+        # print("projected!")
+
+        normalize_projected = (projected - torch.min(projected)) / torch.max(projected)# * 0.5 #not sure why mult. by 0.5 here brings it to [0,1]ish
+
+        print("normalized max and min: ", torch.max(normalize_projected), torch.min(normalize_projected))
+
+        # print(normalize_projected.shape)
+        ### 
+        return normalize_projected
+
     def visualize(self, input_, input_num):
         #options
         visualize_model_arch = False
@@ -197,13 +221,25 @@ class HourglassModel(nn.Module):
             print(self.seq)
         
         if(view_feature_maps):
-            # print("length: ", len(visualisation_feature_map))
+            
+            # this is a list of all the layers that had the hook called
             # print(visualisation_feature_map.keys())
+
+
+            # print(list(visualisation_feature_map.values())[0].shape) # = torch.Size([1, 256, 36, 64])
             # print(list(visualisation_feature_map.values())[0][0,0,:,:].shape)
 
-            cv2.imwrite(os.path.join("latent_images", "img" + str(input_num) + ".png"), list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy() * 255)
-            print(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
-            
+            # get a layer
+            latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()#.numpy()
+            latent_slice = list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach()#.numpy()
+
+            print("latent shape: ", latent.shape)
+            latent_vis = self.visualize_layer(latent)
+
+            # latent_slice = visualize_layer(latent)
+
+            cv2.imwrite(os.path.join("latent_images", "img" + str(input_num) + ".png"), latent_vis.numpy() * 255)
+            # print(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
 
         return
 
