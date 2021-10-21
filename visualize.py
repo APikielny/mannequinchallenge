@@ -10,13 +10,13 @@ def visualize_layer(latent):
 
         normalized_latent = (latent - torch.min(latent)) / torch.max(latent)
 
-        reshaped_latent = torch.reshape(normalized_latent, (256, -1)) 
+        reshaped_latent = torch.reshape(normalized_latent, (-1, 256)) 
         print("reshaped shape", reshaped_latent.shape)       
 
         ################################### PCA
-        # (U,S,V) = torch.pca_lowrank(torch.reshape(reshaped_latent, (36, 256, 64)), q=None, center=True, niter=2) #TODO do I need to center?
+        (U,S,V) = torch.pca_lowrank(reshaped_latent, q=None, center=False, niter=2) #TODO do I need to center?
 
-        U,S,V = torch.linalg.svd(reshaped_latent)
+        # U,S,V = torch.linalg.svd(reshaped_latent)
         
 
         k = 3
@@ -25,7 +25,12 @@ def visualize_layer(latent):
         print("S shape: ", S.shape)
         print("V shape: ", V.shape)
 
-        projected = torch.matmul(reshaped_latent.reshape(-1, 256), U[:, :k])
+        # projected = torch.matmul(reshaped_latent.reshape(-1, 256), U[:, :k]) #this method worked with the linalg svd #TODO I think this should be V 
+        projected = torch.matmul(reshaped_latent, V[:, :k]) #TODO I think this should be V
+
+        #https://pytorch.org/docs/stable/generated/torch.pca_lowrank.html
+        #https://www.programcreek.com/python/example/101191/torch.svd
+
 
 
         # projected = V[:,:,:3]
