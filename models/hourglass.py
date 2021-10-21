@@ -19,6 +19,8 @@ import matplotlib.pyplot as plt
 import cv2
 import os
 
+from visualize import visualize_layer, visualize, view_all_activation_maps
+
 
 class inception(nn.Module):
     def __init__(self, input_size, config):
@@ -60,8 +62,8 @@ class inception(nn.Module):
 
 visualisation_feature_map = {}
 
+#callback from activation hook
 def hook_fn(m, i, o):
-    # print("registered hook with o = ", o)
     visualisation_feature_map[m] = o
 
 class Channels1(nn.Module):
@@ -84,6 +86,10 @@ class Channels1(nn.Module):
                 nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # EEE
+
+        # print("self.list size", len(self.list))
+        # print("self.list", self.list)
+        # this gives confidence that self.list actually contains Channels1()
 
         for layer in self.list:
             layer.register_forward_hook(hook_fn)
@@ -114,6 +120,9 @@ class Channels2(nn.Module):
             )
         )  # EE1EF
 
+        for layer in self.list:
+            layer.register_forward_hook(hook_fn)
+
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
 
@@ -140,6 +149,9 @@ class Channels3(nn.Module):
             )
         )  # BC
 
+        for layer in self.list:
+            layer.register_forward_hook(hook_fn)
+
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
 
@@ -165,6 +177,9 @@ class Channels4(nn.Module):
             )
         )  # A
 
+        for layer in self.list:
+            layer.register_forward_hook(hook_fn)
+
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
 
@@ -185,64 +200,6 @@ class HourglassModel(nn.Module):
         self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
-    def visualize_layer(self, latent):
-        ################################### PCA
-        (U,S,V) = torch.pca_lowrank(torch.reshape(latent, (36, 64, 256)), q=None, center=True, niter=2)
-
-
-        k = 3
-
-        # print("U shape: ", U.shape)
-        # print("S shape: ", S.shape)
-        # print("V shape: ", V.shape)
-
-        # projected = torch.matmul(latent, V[:, :, :k])
-        projected = U[:,:,:3]
-
-        # print("projected!")
-
-        normalize_projected = (projected - torch.min(projected)) / torch.max(projected)# * 0.5 #not sure why mult. by 0.5 here brings it to [0,1]ish
-
-        print("normalized max and min: ", torch.max(normalize_projected), torch.min(normalize_projected))
-
-        # print(normalize_projected.shape)
-        ### 
-        return normalize_projected
-
-    def visualize(self, input_, input_num):
-        #options
-        visualize_model_arch = False
-        view_feature_maps = True
-
-        # print("visualizing!!")
-        # pred_feature = self.seq(input_)
-
-        if(visualize_model_arch):
-            print(self.seq)
-        
-        if(view_feature_maps):
-            
-            # this is a list of all the layers that had the hook called
-            # print(visualisation_feature_map.keys())
-
-
-            # print(list(visualisation_feature_map.values())[0].shape) # = torch.Size([1, 256, 36, 64])
-            # print(list(visualisation_feature_map.values())[0][0,0,:,:].shape)
-
-            # get a layer
-            latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()#.numpy()
-            latent_slice = list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach()#.numpy()
-
-            print("latent shape: ", latent.shape)
-            latent_vis = self.visualize_layer(latent)
-
-            # latent_slice = visualize_layer(latent)
-
-            cv2.imwrite(os.path.join("latent_images", "img" + str(input_num) + ".png"), latent_vis.numpy() * 255)
-            # print(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
-
-        return
-
     def forward(self, input_, input_num):
 
         print("i", input_num)
@@ -254,6 +211,6 @@ class HourglassModel(nn.Module):
 
         boolVisualize = True
         if (boolVisualize):
-            self.visualize(input_, input_num)
+            visualize(visualisation_feature_map, input_, input_num)
 
         return pred_d, pred_confidence
