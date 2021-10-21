@@ -200,9 +200,9 @@ class HourglassModel(nn.Module):
         self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
         self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
-    def forward(self, input_, input_num):
+    def forward(self, input_, targets):
 
-        print("i", input_num)
+        frameName = (targets['img_1_path'][0].split('/')[-1])[:-4]
 
         pred_feature = self.seq(input_)
 
@@ -211,6 +211,6 @@ class HourglassModel(nn.Module):
 
         boolVisualize = True
         if (boolVisualize):
-            visualize(visualisation_feature_map, input_, input_num)
+            visualize(visualisation_feature_map, input_, frameName)
 
         return pred_d, pred_confidence

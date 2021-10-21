@@ -56,7 +56,7 @@ def view_all_activation_maps(visualisation_feature_map):
     for i in range(len(feature_map_list)):
         print(feature_map_list[i].shape)
 
-def visualize(visualisation_feature_map, input_, input_num):
+def visualize(visualisation_feature_map, input_, frameName):
     #options
     visualize_model_arch = False
     view_feature_maps = True
@@ -92,7 +92,7 @@ def visualize(visualisation_feature_map, input_, input_num):
 
         # latent_slice = visualize_layer(latent)
 
-        cv2.imwrite(os.path.join("latent_images", "img" + str(input_num) + ".png"), latent_vis.numpy() * 255)
+        cv2.imwrite(os.path.join("latent_images", frameName + ".png"), latent_vis.numpy() * 255)
         # print(list(visualisation_feature_map.values())[0][0,0,:,:].cpu().detach().numpy())
 
     return

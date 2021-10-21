@@ -610,13 +610,13 @@ class Pix2PixModel(base_model.BaseModel):
 
             hdf5_file_write.close()
 
-    def run_and_save_DAVIS(self, input_, targets, save_path, input_num):
+    def run_and_save_DAVIS(self, input_, targets, save_path):
         assert (self.num_input == 3)
         input_imgs = autograd.Variable(input_.cuda(), requires_grad=False)
 
         stack_inputs = input_imgs
 
-        prediction_d, pred_confidence = self.netG.forward(stack_inputs, input_num)
+        prediction_d, pred_confidence = self.netG.forward(stack_inputs, targets)
         pred_log_d = prediction_d.squeeze(1)
         pred_d = torch.exp(pred_log_d)
 
