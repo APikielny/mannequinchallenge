@@ -24,6 +24,8 @@ import h5py
 import os.path
 from skimage.io import imsave
 from models import hourglass
+from models import loss
+
 
 import torchvision.utils as vutils
 
@@ -610,12 +612,28 @@ class Pix2PixModel(base_model.BaseModel):
 
             hdf5_file_write.close()
 
-    def train(self, input_):
-        input_imgs = autograd.Variable(input_.cuda(), requires_grad=True)
+    def get_latent(self, input, targets):
+        input_imgs = autograd.Variable(input.cuda(), requires_grad=True)
         stack_inputs = input_imgs
-        prediction_d, pred_confidence = self.netG.forward(stack_inputs, targets)
-        pred_log_d = prediction_d.squeeze(1)
-        pred_d = torch.exp(pred_log_d)
+        latent = self.netG.forward(stack_inputs, targets, False, True)
+        # pred_log_d = prediction_d.squeeze(1)
+        # pred_d = torch.exp(pred_log_d)
+        return latent
+
+    def latent_train(self, input_list, targets_list):
+        print("latent training")
+        latent1 = self.get_latent(input_list[0], targets_list[0])
+        latent2 = self.get_latent(input_list[1], targets_list[1])
+
+        print("latent shape", latent2.shape)
+
+
+        loss = torch.mean((latent1 - latent2) ** 2)
+        print("loss: ", loss)
+
+        #zero optimizer gradients
+        #loss.backward()
+        #optimizer.step()
 
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):

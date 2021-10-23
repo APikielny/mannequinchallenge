@@ -38,9 +38,35 @@ best_epoch = 0
 global_step = 0
 
 
+#make dict with data frames
+data_frames = {}
 for i,data in enumerate(video_dataset):
-    stacked_img = data[0]
-    model.run_and_save_DAVIS(stacked_img, targets, save_path)
+    data_frames[i] = data
+
+
+print("len", len(data_frames))
+
+
+
+
+for i in range(0, len(data_frames), 2):
+
+
+    first_data = data_frames[i]
+    second_data = data_frames[i + 1]
+
+
+    inputs = []
+
+    stacked_img_1 = first_data[0]
+    targets_1 = first_data[1] #don't actually need this for train I think, but need it to make the forward function happy (could change)
+    stacked_img_2 = second_data[0]
+    targets_2 = second_data[1]
+
+    inputs = [stacked_img_1, stacked_img_2]
+    targets = [targets_1, targets_2]
+
+    model.latent_train(inputs, targets)
 
 # print(
 #     '=================================  BEGIN VALIDATION ====================================='

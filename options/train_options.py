@@ -58,6 +58,7 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--no_flip', action='store_true',
                                  help='if specified, do not flip the images for data argumentation')
         
+        ## added by Adam
         self.parser.add_argument('--visualize', action='store_true',
                                 help='visualize latent space')
 
