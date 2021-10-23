@@ -51,4 +51,4 @@ for i, data in enumerate(video_dataset):
     # print(i)
     stacked_img = data[0]
     targets = data[1]
-    model.run_and_save_DAVIS(stacked_img, targets, save_path)
+    model.run_and_save_DAVIS(stacked_img, targets, save_path, opt.visualize)

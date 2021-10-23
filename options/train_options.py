@@ -57,5 +57,8 @@ class TrainOptions(BaseOptions):
                                  help='do not save intermediate training results to [opt.checkpoints_dir]/[opt.name]/web/')
         self.parser.add_argument('--no_flip', action='store_true',
                                  help='if specified, do not flip the images for data argumentation')
+        
+        self.parser.add_argument('--visualize', action='store_true',
+                                help='visualize latent space')
 
         self.isTrain = True
