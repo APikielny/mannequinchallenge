@@ -26,7 +26,7 @@ def visualize_layer(latent):
         print("V shape: ", V.shape)
 
         # projected = torch.matmul(reshaped_latent.reshape(-1, 256), U[:, :k]) #this method worked with the linalg svd #TODO I think this should be V 
-        projected = torch.matmul(reshaped_latent, V[:, :k]) #TODO I think this should be V
+        projected = torch.matmul(reshaped_latent, V[:, :k])
 
         #https://pytorch.org/docs/stable/generated/torch.pca_lowrank.html
         #https://www.programcreek.com/python/example/101191/torch.svd
