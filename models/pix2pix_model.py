@@ -91,21 +91,25 @@ class Pix2PixModel(base_model.BaseModel):
                 '===================Loading Pretrained Model OURS ==================================='
             )
 
-            if not _isTrain:
-                if self.num_input == 7:
-                    model_parameters = self.load_network(
-                        new_model, 'G', 'best_depth_Ours_Bilinear_inc_7')
-                elif self.num_input == 3:
-                    model_parameters = self.load_network(
-                        new_model, 'G', 'best_depth_Ours_Bilinear_inc_3')
-                elif self.num_input == 6:
-                    model_parameters = self.load_network(
-                        new_model, 'G', 'best_depth_Ours_Bilinear_inc_6')
-                else:
-                    print('Something Wrong')
-                    sys.exit()
+            if opt.weights is not None:
+                model_parameters = self.load_network(
+                            new_model, 'G', opt.weights)
+            else:
+                if not _isTrain:
+                    if self.num_input == 7:
+                        model_parameters = self.load_network(
+                            new_model, 'G', 'best_depth_Ours_Bilinear_inc_7')
+                    elif self.num_input == 3:
+                        model_parameters = self.load_network(
+                            new_model, 'G', 'best_depth_Ours_Bilinear_inc_3')
+                    elif self.num_input == 6:
+                        model_parameters = self.load_network(
+                            new_model, 'G', 'best_depth_Ours_Bilinear_inc_6')
+                    else:
+                        print('Something Wrong')
+                        sys.exit()
 
-                new_model.load_state_dict(model_parameters)
+            new_model.load_state_dict(model_parameters) #TODO for some reason have to move this above parallel depending on my model vs. original models
 
             new_model = torch.nn.parallel.DataParallel(
                 new_model.cuda(), device_ids=range(torch.cuda.device_count()))
@@ -629,7 +633,19 @@ class Pix2PixModel(base_model.BaseModel):
 
 
         loss = torch.mean((latent1 - latent2) ** 2)
-        print("loss: ", loss)
+        # loss = torch.mean(latent1 - latent2)
+        # print("loss: ", loss)
+
+        #this works
+        # loss = torch.mean(torch.ones((3,3), requires_grad = True))
+
+        #taken from optimize_parameters
+        #####
+        self.optimizer_G.zero_grad()
+        # self.backward_G(0) #TODO check n_iters
+        loss.backward()
+        self.optimizer_G.step()
+        #####
 
         #zero optimizer gradients
         #loss.backward()

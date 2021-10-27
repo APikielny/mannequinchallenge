@@ -61,5 +61,8 @@ class TrainOptions(BaseOptions):
         ## added by Adam
         self.parser.add_argument('--visualize', action='store_true',
                                 help='visualize latent space')
+        
+        self.parser.add_argument('--weights', type=str,
+                                help='to test new custom models, instead of the default models')
 
         self.isTrain = True

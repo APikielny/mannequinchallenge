@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from os import system
 import torch
 from options.train_options import TrainOptions
 from loaders import aligned_data_loader
@@ -38,19 +39,12 @@ best_epoch = 0
 global_step = 0
 
 
-#make dict with data frames
+#make dict with data frames #TODO this is inefficient and doesn't use the dataloader intelligently
 data_frames = {}
 for i,data in enumerate(video_dataset):
     data_frames[i] = data
 
-
-print("len", len(data_frames))
-
-
-
-
-for i in range(0, len(data_frames), 2):
-
+for i in range(0, len(data_frames) - 1, 2):
 
     first_data = data_frames[i]
     second_data = data_frames[i + 1]
@@ -68,18 +62,7 @@ for i in range(0, len(data_frames), 2):
 
     model.latent_train(inputs, targets)
 
-# print(
-#     '=================================  BEGIN VALIDATION ====================================='
-# )
-
-# print('TESTING ON VIDEO')
-
-# model.switch_to_eval()
-# save_path = 'test_data/viz_predictions/'
-# print('save_path %s' % save_path)
-
-# for i, data in enumerate(video_dataset):
-#     # print(i)
-#     stacked_img = data[0]
-#     targets = data[1]
-#     model.run_and_save_DAVIS(stacked_img, targets, save_path)
+# torch.save(model.netG.cpu().state_dict(), 'latent_constrained_model.pth')
+# model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
+import time
+torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model.pth')
