@@ -14,22 +14,48 @@ def visualize_layer(latent):
         print("reshaped shape", reshaped_latent.shape)       
 
         ################################### PCA
-        (U,S,V) = torch.pca_lowrank(reshaped_latent, q=None, center=False, niter=2) #TODO do I need to center?
+        #https://pytorch.org/docs/stable/generated/torch.pca_lowrank.html
 
-        # U,S,V = torch.linalg.svd(reshaped_latent)
-        
+        # (U,S,V) = torch.pca_lowrank(reshaped_latent, q=None, center=False, niter=2) #TODO do I need to center?
+        # projected = torch.matmul(reshaped_latent, V[:, :k])
 
         k = 3
 
-        print("U shape: ", U.shape)
-        print("S shape: ", S.shape)
-        print("V shape: ", V.shape)
+        #https://www.programcreek.com/python/example/101191/torch.svd
+        # U,S,Vh = torch.linalg.svd(reshaped_latent)
+        # print("U shape: ", U.shape)
+        # print("S shape: ", S.shape)
+        # print("Vh shape: ", Vh.shape)
+
+
+        # print("dist: ", torch.dist(reshaped_latent, torch.mm(torch.mm(U, torch.diag(S)), Vh.t())))
 
         # projected = torch.matmul(reshaped_latent.reshape(-1, 256), U[:, :k]) #this method worked with the linalg svd #TODO I think this should be V 
-        projected = torch.matmul(reshaped_latent, V[:, :k])
 
-        #https://pytorch.org/docs/stable/generated/torch.pca_lowrank.html
-        #https://www.programcreek.com/python/example/101191/torch.svd
+        #https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca
+        #https://pytorch.org/docs/stable/generated/torch.svd.html
+        a_big = reshaped_latent
+        u, s, v = torch.svd(a_big)
+        print("U shape: ", u.shape)
+        print("S shape: ", s.shape)
+        print("Vh shape: ", v.shape)
+        print("dist", torch.dist(a_big, torch.matmul(torch.matmul(u, torch.diag_embed(s)), v.transpose(-2, -1))))
+
+        reconstruct = torch.matmul(u[:,:k], torch.diag_embed(s)[:k,:k])
+        print(reconstruct.shape)
+
+        #reconstruct to original dims and measure distance. With higher k value, this distance decreases
+        print("reconstruct dist", torch.dist(a_big, torch.matmul(reconstruct, v[:, :k].transpose(-2, -1))))
+
+        return torch.reshape(reconstruct, (36, 64, -1))
+
+
+
+
+
+
+
+
 
 
 
@@ -43,10 +69,10 @@ def visualize_layer(latent):
 
         # print(normalize_projected.shape)
         ### 
-        print('shape: ', projected.shape)
-        projected = torch.reshape(projected, (36, 64, -1))
+        # print('shape: ', projected.shape)
+        # projected = torch.reshape(projected, (36, 64, -1))
 
-        return projected
+        # return projected
         # return normalized_latent[0,:,:]
         # return latent[0,:,:]
     
