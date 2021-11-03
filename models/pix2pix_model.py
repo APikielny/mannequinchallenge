@@ -69,6 +69,7 @@ class Pix2PixModel(base_model.BaseModel):
 
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
+        self.weights = opt.weights
 
         self.mode = opt.mode
         if opt.input == 'single_view':
@@ -666,7 +667,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         for i in range(0, len(targets['img_1_path'])):
 
-            youtube_dir = save_path + targets['img_1_path'][i].split('/')[-2]
+            youtube_dir = save_path + targets['img_1_path'][i].split('/')[-2] + '/' + str(self.weights) + '/'
 
             if not os.path.exists(youtube_dir):
                 os.makedirs(youtube_dir)
