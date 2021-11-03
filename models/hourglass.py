@@ -205,7 +205,9 @@ class HourglassModel(nn.Module):
 
     def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
 
-        frameName = (targets['img_1_path'][0].split('/')[-1])[:-4]
+        split = targets['img_1_path'][0].split('/')
+        frameName = split[-1][:-4]
+        videoType = split[-2]
 
         pred_feature = self.seq(input_)
 
@@ -213,7 +215,7 @@ class HourglassModel(nn.Module):
         pred_confidence = self.uncertainty_layer(pred_feature)
 
         if (boolVisualize):
-            visualize(visualisation_feature_map, input_, frameName)
+            visualize(visualisation_feature_map, input_, videoType, frameName)
 
         if (latentOutput):
             latent = list(visualisation_feature_map.values())[1][0,:,:,:]

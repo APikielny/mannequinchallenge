@@ -33,8 +33,8 @@ def visualize_layer(latent):
 def visualize_layer_sklearn(latent):
 
         # (256, w, h)
-        print(type(latent))
-        print(latent.size())
+        # print(type(latent))
+        # print(latent.size())
         # normalized_latent = (latent - torch.min(latent)) / torch.max(latent)
 
         # reshaped_latent = torch.reshape(normalized_latent, (-1, 256))
@@ -46,8 +46,8 @@ def visualize_layer_sklearn(latent):
 
         pca = PCA(n_components=3)
         out = pca.fit_transform(reshaped_latent)
-        print(type(out))
-        print(out.shape)
+        # print(type(out))
+        # print(out.shape)
 
         reshaped_out = np.reshape(out, (36, 64, -1))
 
@@ -60,7 +60,7 @@ def view_all_activation_maps(visualisation_feature_map):
     for i in range(len(feature_map_list)):
         print(feature_map_list[i].shape)
 
-def visualize(visualisation_feature_map, input_, frameName):
+def visualize(visualisation_feature_map, input_, videoType, frameName):
     #options
     visualize_model_arch = False
     view_feature_maps = True
@@ -78,12 +78,11 @@ def visualize(visualisation_feature_map, input_, frameName):
         # print(list(visualisation_feature_map.values())[1].size())
 
         # get a layer (Pick between 0 or 1 module in Channel 1)
-        latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()
-        # latent = list(visualisation_feature_map.values())[1][0,:,:,:].cpu().detach()#.numpy()
+        # latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()
+        latent = list(visualisation_feature_map.values())[1][0,:,:,:].cpu().detach()#.numpy()
 
         # SKLearn produces more consistent results
         useSkLearn = True
-
         if(useSkLearn):
             latent_vis = visualize_layer_sklearn(latent)
         else:
@@ -102,7 +101,11 @@ def visualize(visualisation_feature_map, input_, frameName):
         scaleFactor = 4
         img = cv2.resize(img, (64 * scaleFactor, 36 * scaleFactor))
 
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(os.path.join("latent_images", frameName + ".png"), img)
+        folder_path = os.path.join(os.getcwd(), "latent_images", videoType)
+        # create directory if it does not exist
+        if(not os.path.exists(folder_path)):
+            os.makedirs(folder_path)
+
+        cv2.imwrite(os.path.join(folder_path, frameName + ".png"), img)
 
     return
