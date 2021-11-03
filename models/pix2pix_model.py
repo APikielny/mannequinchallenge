@@ -625,14 +625,13 @@ class Pix2PixModel(base_model.BaseModel):
         return latent
 
     def latent_train(self, input_list, targets_list):
-        print("latent training")
         latent1 = self.get_latent(input_list[0], targets_list[0])
         latent2 = self.get_latent(input_list[1], targets_list[1])
 
-        print("latent shape", latent2.shape)
+        print("Constraining between: ", targets_list[0]['img_1_path'][0].split('/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
 
-        loss = torch.mean((latent1 - latent2) ** 2)
+        loss = torch.mean((latent1 - latent2) ** 2) #just using L2 loss between the two latents for now
         # loss = torch.mean(latent1 - latent2)
         # print("loss: ", loss)
 
