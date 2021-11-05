@@ -9,7 +9,9 @@ parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
 parser.add_argument('--folder', type=str,
                     help='folder with frames')
 
-#sum up difference in weights between two models
+# sum up difference in weights between two models
+
+
 def compareModelWeights(model_a, model_b):
     module_a = model_a._modules
     module_b = model_b._modules
@@ -27,16 +29,25 @@ def compareModelWeights(model_a, model_b):
             sum_diff += abs(np.mean(layer_a.weight.data-layer_b.weight.data))
     return sum_diff
 
-#compare L2 distance between frames and plot through time
-def L2_frame_consistency(folder, cut_in_half = True): #cut in half if the frame has the depth map and original image
+# compare L2 distance between frames and plot through time
+
+
+# cut in half: if the frame has the depth map and original image, only use depth part of jpg
+def L2_frame_consistency(folder, cut_in_half=True):
+    img_file_names = []
     img_list = []
-    for( directory, subdirectories, file ) in os.walk(folder):
-        for f in file:
-            if not f.startswith('.'): #ignore hidden files
-                if(cut_in_half):
-                    img_list.append(cv2.imread(os.path.join(directory,f))[:,512:,:])
-                else:
-                    img_list.append(cv2.imread(os.path.join(directory,f)))
+
+    # make list of frames in correct order
+    i = 0
+    img_name = "frame"
+    frame = cv2.imread(os.path.join(folder, img_name+str(i)+".jpg"))
+    while frame is not None:
+        if(cut_in_half):
+            img_list.append(frame[:, 512:, :])
+        else:
+            img_list.append(frame)
+        i += 1
+        frame = cv2.imread(os.path.join(folder, img_name+str(i)+".jpg"))
 
     if(len(img_list) < 2):
         print("Error: check the input folder.")
@@ -45,12 +56,29 @@ def L2_frame_consistency(folder, cut_in_half = True): #cut in half if the frame 
     distances = []
     for i in range(len(img_list) - 2):
         distances.append(np.sum(np.square(img_list[i] - img_list[i + 1])))
-    
+
+    # TODO normalize or not??
+    distances = (np.array(distances) - np.min(distances))
+    distances = distances / np.max(distances)
+
+    variance = np.var(np.array(distances))
+
     plt.plot(distances)
     plt.xlabel("Frame")
     plt.ylabel("L2 between adjacent frames")
-    save_path = "L2_frame_comparisons/" + folder.split("/")[-1] + "_L2_plot.png"
+
+    name = folder.split("/")[-1]
+    dataset = folder.split("/")[-2]
+    if name == "":
+        name = folder.split("/")[-2]
+        dataset = folder.split("/")[-3]
+
+    plt.title(name + ",\n Variance: " + str(variance))
+    save_path = "L2_frame_comparisons/" + dataset + "/" + \
+        name + "_L2_plot.png"
     plt.savefig(save_path)
+    print(save_path)
+
 
 args = parser.parse_args()
 L2_frame_consistency(args.folder)

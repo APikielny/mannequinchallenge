@@ -45,6 +45,7 @@ for i,data in enumerate(video_dataset):
     data_frames[i] = data
 
 for i in range(0, len(data_frames) - 1, 1):
+# for i in range(len(data_frames) - 2, 0, -1): #backwards
 
     first_data = data_frames[i]
     second_data = data_frames[i + 1]
