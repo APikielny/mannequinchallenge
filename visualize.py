@@ -53,7 +53,6 @@ def visualize_layer_sklearn(latent):
 
         return reshaped_out
 
-
 # view the shape of each activation layer's shape in our map
 def view_all_activation_maps(visualisation_feature_map):
     feature_map_list = list(visualisation_feature_map.values())

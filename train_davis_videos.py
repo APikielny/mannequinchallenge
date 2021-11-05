@@ -23,7 +23,7 @@ BATCH_SIZE = 1
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
 # video_list = 'test_data/test_davis_video_list.txt'
-video_list = 'test_data/test_marc_video_list.txt'
+video_list = 'test_data/test_marc_video_list_reorder.txt'
 
 eval_num_threads = 2
 video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
@@ -44,7 +44,7 @@ data_frames = {}
 for i,data in enumerate(video_dataset):
     data_frames[i] = data
 
-for i in range(0, len(data_frames) - 1, 2):
+for i in range(0, len(data_frames) - 1, 1):
 
     first_data = data_frames[i]
     second_data = data_frames[i + 1]
@@ -65,4 +65,4 @@ for i in range(0, len(data_frames) - 1, 2):
 # torch.save(model.netG.cpu().state_dict(), 'latent_constrained_model.pth')
 # model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
 import time
-torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model.pth')
+torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
