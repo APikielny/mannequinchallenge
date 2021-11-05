@@ -45,7 +45,7 @@ print('TESTING ON VIDEO')
 
 model.switch_to_eval()
 save_path = 'test_data/viz_predictions/'
-print('save_path %s' % save_path)
+# print('save_path %s' % save_path)
 
 for i, data in enumerate(video_dataset):
     # print(i)

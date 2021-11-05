@@ -62,8 +62,11 @@ class inception(nn.Module):
 
 visualisation_feature_map = {}
 
+#type is Sequential, torch.tensor
 #callback from activation hook
+
 def hook_fn(m, i, o):
+    # print(m)
     visualisation_feature_map[m] = o
 
 class Channels1(nn.Module):
@@ -120,8 +123,8 @@ class Channels2(nn.Module):
             )
         )  # EE1EF
 
-        for layer in self.list:
-            layer.register_forward_hook(hook_fn)
+        # for layer in self.list:
+        #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
@@ -149,8 +152,8 @@ class Channels3(nn.Module):
             )
         )  # BC
 
-        for layer in self.list:
-            layer.register_forward_hook(hook_fn)
+        # for layer in self.list:
+        #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
@@ -177,8 +180,8 @@ class Channels4(nn.Module):
             )
         )  # A
 
-        for layer in self.list:
-            layer.register_forward_hook(hook_fn)
+        # for layer in self.list:
+        #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
         return self.list[0](x)+self.list[1](x)
@@ -202,7 +205,9 @@ class HourglassModel(nn.Module):
 
     def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
 
-        frameName = (targets['img_1_path'][0].split('/')[-1])[:-4]
+        split = targets['img_1_path'][0].split('/')
+        frameName = split[-1][:-4]
+        videoType = split[-2]
 
         pred_feature = self.seq(input_)
 
@@ -210,7 +215,7 @@ class HourglassModel(nn.Module):
         pred_confidence = self.uncertainty_layer(pred_feature)
 
         if (boolVisualize):
-            visualize(visualisation_feature_map, input_, frameName)
+            visualize(visualisation_feature_map, input_, videoType, frameName)
 
         if (latentOutput):
             latent = list(visualisation_feature_map.values())[1][0,:,:,:]
