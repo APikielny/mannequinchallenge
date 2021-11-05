@@ -37,17 +37,16 @@ def L2_frame_consistency(folder, cut_in_half=True):
     img_file_names = []
     img_list = []
 
-    # make list of frames in correct order
-    i = 0
-    img_name = "frame"
-    frame = cv2.imread(os.path.join(folder, img_name+str(i)+".jpg"))
-    while frame is not None:
+    for filename in os.listdir(folder):
+        if filename.endswith(".jpg") and not filename.startswith("."):
+            img_file_names.append(filename)
+    img_file_names.sort()
+    for filename in img_file_names:
+        img = cv2.imread(os.path.join(folder, filename))
         if(cut_in_half):
-            img_list.append(frame[:, 512:, :])
+            img_list.append(img[:, 512:, :])
         else:
-            img_list.append(frame)
-        i += 1
-        frame = cv2.imread(os.path.join(folder, img_name+str(i)+".jpg"))
+            img_list.append(img)
 
     if(len(img_list) < 2):
         print("Error: check the input folder.")
@@ -73,7 +72,7 @@ def L2_frame_consistency(folder, cut_in_half=True):
         name = folder.split("/")[-2]
         dataset = folder.split("/")[-3]
 
-    plt.title(name + ",\n Variance: " + str(variance))
+    plt.title(name + ",\n Variance: " + str(variance)[:6])
     save_path = "L2_frame_comparisons/" + dataset + "/" + \
         name + "_L2_plot.png"
     plt.savefig(save_path)

@@ -63,6 +63,9 @@ class TrainOptions(BaseOptions):
                                 help='visualize latent space')
         
         self.parser.add_argument('--weights', type=str,
-                                help='to test new custom models, instead of the default models')
+                                help='to load in new custom models, instead of the default models')
+
+        self.parser.add_argument('--save_weights', type=str,
+                                help='to save new custom models')
 
         self.isTrain = True

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 from os import system
 import torch
 from options.train_options import TrainOptions
@@ -39,22 +40,22 @@ best_epoch = 0
 global_step = 0
 
 
-#make dict with data frames #TODO this is inefficient and doesn't use the dataloader intelligently
+# make dict with data frames #TODO this is inefficient and doesn't use the dataloader intelligently
 data_frames = {}
-for i,data in enumerate(video_dataset):
+for i, data in enumerate(video_dataset):
     data_frames[i] = data
 
 for i in range(0, len(data_frames) - 1, 1):
-# for i in range(len(data_frames) - 2, 0, -1): #backwards
+    # for i in range(len(data_frames) - 2, 0, -1): #backwards
 
     first_data = data_frames[i]
     second_data = data_frames[i + 1]
 
-
     inputs = []
 
     stacked_img_1 = first_data[0]
-    targets_1 = first_data[1] #don't actually need this for train I think, but need it to make the forward function happy (could change)
+    # don't actually need this for train I think, but need it to make the forward function happy (could change)
+    targets_1 = first_data[1]
     stacked_img_2 = second_data[0]
     targets_2 = second_data[1]
 
@@ -65,5 +66,6 @@ for i in range(0, len(data_frames) - 1, 1):
 
 # torch.save(model.netG.cpu().state_dict(), 'latent_constrained_model.pth')
 # model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
-import time
-torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
+# torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
+torch.save(model.netG.module.cpu().state_dict(),
+           'checkpoints/test_local/' + opt.save_weights + '_net_G.pth')
