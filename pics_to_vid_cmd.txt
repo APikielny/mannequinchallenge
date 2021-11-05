@@ -1,0 +1,4 @@
+ffmpeg -framerate 60 -f image2 -i ./ORIGINAL_translate/frame%d.jpg -vcodec mpeg4 -c:v libx264 -y test.mp4
+
+#can try playing with codec to get higher res but this one looks ok imo
+#set to 60fps for marc's videos. 
