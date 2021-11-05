@@ -57,15 +57,21 @@ class TrainOptions(BaseOptions):
                                  help='do not save intermediate training results to [opt.checkpoints_dir]/[opt.name]/web/')
         self.parser.add_argument('--no_flip', action='store_true',
                                  help='if specified, do not flip the images for data argumentation')
-        
-        ## added by Adam
+
+        # added by Adam
         self.parser.add_argument('--visualize', action='store_true',
-                                help='visualize latent space')
-        
+                                 help='visualize latent space')
+
         self.parser.add_argument('--weights', type=str,
-                                help='to load in new custom models, instead of the default models')
+                                 help='to load in new custom models, instead of the default models')
 
         self.parser.add_argument('--save_weights', type=str,
-                                help='to save new custom models')
+                                 help='to save new custom models')
+
+        self.parser.add_argument('--marc_data_train', type=str,
+                                 help='which videos to use for training, options rotate, translate, static')
+
+        self.parser.add_argument('--marc_data_inference', type=str,
+                                 help='which videos to use for testing, options rotate, translate, static')
 
         self.isTrain = True

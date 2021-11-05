@@ -21,8 +21,10 @@ BATCH_SIZE = 1
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
-# video_list = 'test_data/test_davis_video_list.txt'
-video_list = 'test_data/test_marc_video_list_reorder.txt'
+if opt.marc_data_inference is not None:
+    video_list = 'test_data/test_marc_video_list_' + opt.marc_data_inference + '.txt'
+else:
+    video_list = 'test_data/test_davis_video_list.txt'
 
 eval_num_threads = 2
 video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
