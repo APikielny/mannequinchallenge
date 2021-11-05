@@ -625,6 +625,9 @@ class Pix2PixModel(base_model.BaseModel):
         # pred_d = torch.exp(pred_log_d)
         return latent
 
+    def L2(self, a, b):
+        return torch.sum((a - b) ** 2)
+
     def latent_train(self, input_list, targets_list):
         latent1 = self.get_latent(input_list[0], targets_list[0])
         latent2 = self.get_latent(input_list[1], targets_list[1])
@@ -632,7 +635,7 @@ class Pix2PixModel(base_model.BaseModel):
         print("Constraining between: ", targets_list[0]['img_1_path'][0].split('/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
 
-        loss = torch.mean((latent1 - latent2) ** 2) #just using L2 loss between the two latents for now
+        loss = self.L2(latent1, latent2) #just using L2 loss between the two latents for now
         # loss = torch.mean(latent1 - latent2)
         # print("loss: ", loss)
 
