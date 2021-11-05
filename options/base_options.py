@@ -24,7 +24,7 @@ class BaseOptions():
 
     def initialize(self):
         self.parser.add_argument(
-            '--input', type=str, required=True, 
+            '--input', type=str, default='single_view',
             choices=['single_view', 'two_view', 'two_view_k'],
             help='type of input. One of "single_view", "two_view" (no human keypoints),'
             '"two_view_k" (with human keypoints)')
