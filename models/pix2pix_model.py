@@ -94,7 +94,7 @@ class Pix2PixModel(base_model.BaseModel):
 
             if opt.weights is not None:
                 model_parameters = self.load_network(
-                            new_model, 'G', opt.weights)
+                    new_model, 'G', opt.weights)
             else:
                 if not _isTrain:
                     if self.num_input == 7:
@@ -110,7 +110,8 @@ class Pix2PixModel(base_model.BaseModel):
                         print('Something Wrong')
                         sys.exit()
 
-            new_model.load_state_dict(model_parameters) #TODO for some reason have to move this above parallel depending on my model vs. original models
+            # TODO for some reason have to move this above parallel depending on my model vs. original models
+            new_model.load_state_dict(model_parameters)
 
             new_model = torch.nn.parallel.DataParallel(
                 new_model.cuda(), device_ids=range(torch.cuda.device_count()))
@@ -144,7 +145,8 @@ class Pix2PixModel(base_model.BaseModel):
     def forward(self):
 
         # run first network
-        self.input_images = autograd.Variable(self.input.cuda(), requires_grad=False)
+        self.input_images = autograd.Variable(
+            self.input.cuda(), requires_grad=False)
         human_mask = 1.0 - autograd.Variable(
             self.targets['env_mask'].cuda(), requires_grad=False).unsqueeze(1)
         keypoints_img = autograd.Variable(
@@ -538,7 +540,8 @@ class Pix2PixModel(base_model.BaseModel):
         keypoints_img = autograd.Variable(
             targets['keypoints_img'].cuda(), requires_grad=False).unsqueeze(1)
 
-        mvs_depth = autograd.Variable(targets['mvs_depth'].cuda(), requires_grad=False)
+        mvs_depth = autograd.Variable(
+            targets['mvs_depth'].cuda(), requires_grad=False)
         input_depth = autograd.Variable(
             targets['input_depth'].cuda(), requires_grad=False)
 
@@ -632,17 +635,18 @@ class Pix2PixModel(base_model.BaseModel):
         latent1 = self.get_latent(input_list[0], targets_list[0])
         latent2 = self.get_latent(input_list[1], targets_list[1])
 
-        print("Constraining between: ", targets_list[0]['img_1_path'][0].split('/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
+        print("Constraining between: ", targets_list[0]['img_1_path'][0].split(
+            '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
-
-        loss = self.L2(latent1, latent2) #just using L2 loss between the two latents for now
+        # just using L2 loss between the two latents for now
+        loss = self.L2(latent1, latent2)
         # loss = torch.mean(latent1 - latent2)
         # print("loss: ", loss)
 
-        #this works
+        # this works
         # loss = torch.mean(torch.ones((3,3), requires_grad = True))
 
-        #taken from optimize_parameters
+        # taken from optimize_parameters
         #####
         self.optimizer_G.zero_grad()
         # self.backward_G(0) #TODO check n_iters
@@ -650,10 +654,9 @@ class Pix2PixModel(base_model.BaseModel):
         self.optimizer_G.step()
         #####
 
-        #zero optimizer gradients
-        #loss.backward()
-        #optimizer.step()
-
+        # zero optimizer gradients
+        # loss.backward()
+        # optimizer.step()
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)
@@ -661,7 +664,8 @@ class Pix2PixModel(base_model.BaseModel):
 
         stack_inputs = input_imgs
 
-        prediction_d, pred_confidence = self.netG.forward(stack_inputs, targets, visualize)
+        prediction_d, pred_confidence = self.netG.forward(
+            stack_inputs, targets, visualize)
         pred_log_d = prediction_d.squeeze(1)
         pred_d = torch.exp(pred_log_d)
 
@@ -670,7 +674,9 @@ class Pix2PixModel(base_model.BaseModel):
 
         for i in range(0, len(targets['img_1_path'])):
 
-            youtube_dir = save_path + targets['img_1_path'][i].split('/')[-2] + '/' + str(self.weights) + '/'
+            youtube_dir = save_path + \
+                targets['img_1_path'][i].split(
+                    '/')[-2] + '/' + str(self.weights) + '/'
 
             if not os.path.exists(youtube_dir):
                 os.makedirs(youtube_dir)
@@ -680,9 +686,9 @@ class Pix2PixModel(base_model.BaseModel):
 
             pred_d_ref = pred_d.data[i, :, :].cpu().numpy()
 
-            output_path = youtube_dir + '/' + \
+            output_path = youtube_dir + \
                 targets['img_1_path'][i].split('/')[-1]
-            print(output_path)
+            print("Output path: ", output_path)
             disparity = 1. / pred_d_ref
             disparity = disparity / np.max(disparity)
             disparity = np.tile(np.expand_dims(disparity, axis=-1), (1, 1, 3))
