@@ -102,7 +102,6 @@ for i, data in enumerate(video_dataset):
         break
 
 
-# torch.save(model.netG.cpu().state_dict(), 'latent_constrained_model.pth')
 # model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
 # torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
 weights = opt.save_weights
