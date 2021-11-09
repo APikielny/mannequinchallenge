@@ -4,36 +4,51 @@ import os
 import argparse
 import cv2
 import matplotlib.pyplot as plt
+from models import hourglass
+
 
 parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
-parser.add_argument('--folder', type=str,
+parser.add_argument('--L2_folder', type=str,
                     help='folder with frames')
+parser.add_argument('--weights_a', type=str,
+                    help='to compare weights of two models')
+parser.add_argument('--weights_b', type=str,
+                    help='to compare weights of two models')
 
 # sum up difference in weights between two models
 
 
-def compareModelWeights(model_a, model_b):
-    module_a = model_a._modules
-    module_b = model_b._modules
-    if len(list(module_a.keys())) != len(list(module_b.keys())):
-        return False
-    a_modules_names = list(module_a.keys())
-    b_modules_names = list(module_b.keys())
-    sum_diff = 0
-    for i in range(len(a_modules_names)):
-        layer_name_a = a_modules_names[i]
-        layer_name_b = b_modules_names[i]
-        layer_a = module_a[layer_name_a]
-        layer_b = module_b[layer_name_b]
-        if hasattr(layer_a, 'weight') and hasattr(layer_b, 'weight'):
-            sum_diff += abs(np.mean(layer_a.weight.data-layer_b.weight.data))
-    return sum_diff
+# def compareModelWeights(model_a, model_b):
+#     module_a = model_a._modules
+#     module_b = model_b._modules
+#     if len(list(module_a.keys())) != len(list(module_b.keys())):
+#         return False
+#     a_modules_names = list(module_a.keys())
+#     b_modules_names = list(module_b.keys())
+#     sum_diff = 0
+#     for i in range(len(a_modules_names)):
+#         layer_name_a = a_modules_names[i]
+#         layer_name_b = b_modules_names[i]
+#         layer_a = module_a[layer_name_a]
+#         layer_b = module_b[layer_name_b]
+#         if hasattr(layer_a, 'weight') and hasattr(layer_b, 'weight'):
+#             sum_diff += abs(np.mean(layer_a.weight.data-layer_b.weight.data))
+#     return sum_diff
+
+#check whether two sets of weights are exactly equal
+def check_model_equality(weights_a, weights_b):
+    model_a = hourglass.HourglassModel(3)
+    model_b = hourglass.HourglassModel(3)
+    model_a.load_state_dict(weights_a)
+    model_b.load_state_dict(weights_b)
+
+    for p1, p2 in zip(model_a.parameters(), model_b.parameters()):
+        if p1.data.ne(p2.data).sum() > 0: #checks equality
+            return False
+    return True
 
 # compare L2 distance between frames and plot through time
-
-
-# cut in half: if the frame has the depth map and original image, only use depth part of jpg
-def L2_frame_consistency(folder, cut_in_half=True):
+def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
     img_list = []
 
@@ -80,4 +95,13 @@ def L2_frame_consistency(folder, cut_in_half=True):
 
 
 args = parser.parse_args()
-L2_frame_consistency(args.folder)
+if (args.L2_folder is not None):
+    L2_frame_consistency(args.L2_folder)
+
+if (args.weights_a is not None and args.weights_b is not None):
+    print(check_model_equality(torch.load(args.weights_a), torch.load(args.weights_b)))
+
+# weights_a = torch.load(
+#     'checkpoints/test_local/control_1_net_G.pth')
+# weights_b = torch.load(
+#     'checkpoints/test_local/control_2_net_G.pth')

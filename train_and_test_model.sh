@@ -8,7 +8,7 @@ set -e #exit if any command fails
 ###################
 ### Params ########
 ###################
-lr=${1:-"0.1"}
+lr=${1:-"0.01"}
 model_prefix=${2:-"latent_constrained"} #where to save weights
 model_data_train=${3:-"translate"} #what data to use for training
 model_data_test=${4:-${model_data_train}} #default to same as train data
@@ -79,5 +79,5 @@ echo "
 ### Metrics #######
 ###################
 echo "calculating consistency metrics..."
-python metrics.py --folder test_data/viz_predictions/${model_data_test}/${model_name} > /dev/null
+python metrics.py --L2_folder test_data/viz_predictions/${model_data_test}/${model_name} > /dev/null
 echo "metrics written out to L2_frame_comparisons/${model_data_test}/${model_name}_L2_plot.png"

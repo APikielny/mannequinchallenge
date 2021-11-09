@@ -69,8 +69,8 @@ global_step = 0
 
 #     inputs = [stacked_img_1, stacked_img_2]
 #     targets = [targets_1, targets_2]
-#     print("targets", targets)
-# sys.exit()
+#     # print("targets", targets)
+# # sys.exit()
 
 #     model.latent_train(inputs, targets)
 
@@ -80,7 +80,7 @@ global_step = 0
 prev_frame = None
 prev_target = None
 for i, data in enumerate(video_dataset):
-    # assume we have pair (b, c), where prev frame was a
+    # assume we have new pair (b, c), where prev frame was a
 
     # first, constrain curr frame with prev frame (a, b)
     img, target = data
@@ -90,7 +90,7 @@ for i, data in enumerate(video_dataset):
     if(prev_frame is not None):
         model.latent_train([prev_frame, img_1], [prev_target, target_1])
 
-    # then we constrain pair (b, c)
+    # then constrain (b, c)
     if (img.shape[0] > 1):  # if there is actually a full batch
         img_2 = img[1, :, :, :].unsqueeze(0)
         target_2 = {'img_1_path': [targets_list[1]]}
@@ -104,8 +104,8 @@ for i, data in enumerate(video_dataset):
 
 # model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
 # torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
-weights = opt.save_weights
-if weights is None:
-    weights = str(time.time())+'latent_constrained_model'
+save_weights = opt.save_weights
+if save_weights is None:
+    save_weights = str(time.time())+'latent_constrained_model'
 torch.save(model.netG.module.cpu().state_dict(),
-           'checkpoints/test_local/' + weights + '_net_G.pth')
+           'checkpoints/test_local/' + save_weights + '_net_G.pth')
