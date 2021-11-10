@@ -69,11 +69,12 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
 
     distances = []
     for i in range(len(img_list) - 2):
-        distances.append(np.sum(np.square(img_list[i] - img_list[i + 1])))
+        distances.append(np.sqrt(np.sum(np.square(img_list[i] - img_list[i + 1]))))
 
     # TODO normalize or not??
-    distances = (np.array(distances) - np.min(distances))
-    distances = distances / np.max(distances)
+    min = np.min(distances)
+    max = np.max(distances)
+    distances = (np.array(distances) - min) / (max-min)
 
     variance = np.var(np.array(distances))
 
