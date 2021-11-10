@@ -5,6 +5,7 @@ import argparse
 import cv2
 import matplotlib.pyplot as plt
 from models import hourglass
+from scipy.ndimage.filters import gaussian_filter
 
 
 parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
@@ -66,6 +67,11 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     if(len(img_list) < 2):
         print("Error: check the input folder.")
         return
+
+    # Adding gaussian blur (NOTE: sigma is a hyperparam)
+    list = img_list # temp variable, so we can avoid append
+    for i in range(len(img_list)):
+        img_list[i] = gaussian_filter(list[i], sigma = 5)
 
     distances = []
     for i in range(len(img_list) - 2):
