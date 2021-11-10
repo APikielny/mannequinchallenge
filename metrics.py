@@ -69,7 +69,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         return
 
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
-    list = img_list # temp variable, so we can avoid append
+    list = img_list.copy() # temp variable, so we can avoid append
     for i in range(len(img_list)):
         img_list[i] = gaussian_filter(list[i], sigma = 5)
 
