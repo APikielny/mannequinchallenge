@@ -1,6 +1,6 @@
 #!/bin/bash
 ###########
-# This script will train a model, then run inference and check consistency metrics on the ouput 
+# This script will train a model, then run inference and check consistency metrics on the ouput
 ##########
 
 set -e #exit if any command fails
@@ -40,7 +40,7 @@ python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${mo
 FILE=checkpoints/test_local/${model_name}_net_G.pth
 if [ -f "$FILE" ]; then
     echo "Successfully wrote weights to $FILE."
-else 
+else
     echo "Something went wrong when training or writing to $FILE. Exiting."
     exit
 fi
@@ -53,8 +53,9 @@ echo "
 ### Test model ####
 ###################
 echo "running inference..."
-python test_davis_videos.py --weights ${model_name} --marc_data_inference ${model_data_test} > /dev/null
+python test_davis_videos.py --weights ${model_name} --marc_data_inference ${model_data_test} --visualize > /dev/null
 echo "frames written out to test_data/viz_predictions/${model_data_test}/${model_name}"
+echo "latent images written to latent_images/${model_name}"
 
 echo "
 ###############
@@ -64,14 +65,25 @@ echo "
 ###################
 ### convert to video ####
 ###################
-echo "writing frames to video"
+echo "writing depth frames to video"
 mkdir -p test_data/videos/${model_data_test}
 ffmpeg -framerate 60 -f image2 -i test_data/viz_predictions/${model_data_test}/${model_name}/frame%04d.jpg -vcodec mpeg4 -c:v libx264 -y test_data/videos/${model_data_test}/${model_name}.mp4 2> /dev/null
 FILE=test_data/videos/${model_data_test}/${model_name}.mp4
 if [ -f "$FILE" ]; then
-    echo "Successfully wrote video to $FILE."
-else 
+    echo "Successfully wrote depth video to $FILE."
+else
     echo "Something went wrong when writing to $FILE. Exiting."
+    exit
+fi
+
+echo "writing latent frames to video"
+mkdir -p test_data/videos/latent_${model_data_test}
+ffmpeg -framerate 60 -f image2 -i latent_images/${model_data_test}/frame%04d.png -vcodec mpeg4 -c:v libx264 -y test_data/videos/latent_${model_data_test}/${model_name}.mp4 2> /dev/null
+LATENT_FILE=test_data/videos/latent_${model_data_test}/${model_name}.mp4
+if [ -f "$LATENT_FILE" ]; then
+    echo "Successfully wrote latent video to $LATENT_FILE."
+else
+    echo "Something went wrong when writing to $LATENT_FILE. Exiting."
     exit
 fi
 
