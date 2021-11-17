@@ -218,7 +218,7 @@ class HourglassModel(nn.Module):
             visualize(visualisation_feature_map, input_, videoType, frameName)
 
         if (latentOutput):
-            latent = list(visualisation_feature_map.values())[1][0,:,:,:]
+            latent = list(visualisation_feature_map.values())[0][0,:,:,:]
             return latent
 
         return pred_d, pred_confidence

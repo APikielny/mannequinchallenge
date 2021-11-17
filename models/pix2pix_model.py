@@ -628,6 +628,19 @@ class Pix2PixModel(base_model.BaseModel):
         # pred_d = torch.exp(pred_log_d)
         return latent
 
+    def get_output(self, input, targets):
+        input_imgs = autograd.Variable(input.cuda(), requires_grad=False)
+        stack_inputs = input_imgs
+        prediction_d, pred_confidence = self.netG.forward(stack_inputs, targets, False, False)
+        pred_log_d = prediction_d.squeeze(1)
+
+        # Seems to work better when left in log space
+        # pred_d = torch.exp(pred_log_d)
+        # disparity = 1. / pred_d
+        # disparity = disparity / torch.max(disparity)
+        
+        return pred_log_d
+
     def L2(self, a, b):
         return torch.sum((a - b) ** 2)
 
@@ -663,6 +676,28 @@ class Pix2PixModel(base_model.BaseModel):
         # zero optimizer gradients
         # loss.backward()
         # optimizer.step()
+
+    def output_train(self, input_list, targets_list, use_L1_loss):
+        latent1 = self.get_latent(input_list[0], targets_list[0])
+        latent2 = self.get_latent(input_list[1], targets_list[1])
+
+        # weight for constraint loss on output frames vs latent frames
+        output_weight = 0.000001
+        output1 = self.get_output(input_list[0], targets_list[0])
+        output2 = self.get_output(input_list[1], targets_list[1])
+
+        print("Constraining between: ", targets_list[0]['img_1_path'][0].split(
+            '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
+
+        # just using L2 loss between the two latents for now
+        if use_L1_loss:
+            loss = self.L1(latent1, latent2) + output_weight * self.L1(output1, output2)
+        else: 
+            loss = self.L2(latent1, latent2) + output_weight * self.L2(output1, output2)
+
+        self.optimizer_G.zero_grad()
+        loss.backward()
+        self.optimizer_G.step()
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)

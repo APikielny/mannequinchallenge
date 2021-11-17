@@ -8,14 +8,14 @@ set -e #exit if any command fails
 ###################
 ### Params ########
 ###################
-lr=${1:-"0.1"}
+lr=${1:-"0.001"}
 model_prefix=${2:-"latent_constrained"} #where to save weights
 model_data_train=${3:-"static"} #what data to use for training
 model_data_test=${4:-${model_data_train}} #default to same as train data
 
 # Select between these two for L1 vs L2
-# model_name=L2_${model_prefix}_lr_${lr}_data_${model_data_train}
-model_name=L1_${model_prefix}_lr_${lr}_data_${model_data_train}
+model_name=L2_${model_prefix}_lr_${lr}_data_${model_data_train}
+# model_name=L1_${model_prefix}_lr_${lr}_data_${model_data_train}
 
 echo "
 ###############
@@ -37,10 +37,12 @@ echo "
 #TODO if this model already exists, maybe skip?
 
 # Select between these two for L1 vs L2
-# echo "training model with L2..."
-# python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} > /dev/null #the >/dev/null suppresses output from the python script
-echo "training model with L1..."
-python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} --L1 > /dev/null #the >/dev/null suppresses output from the python script
+# ADD --constraint_output to constrain consecutive output frames as well
+
+echo "training model with L2..."
+python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} --constrain_output > /dev/null #the >/dev/null suppresses output from the python script
+# echo "training model with L1..."
+# python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} --L1 > /dev/null #the >/dev/null suppresses output from the python script
 
 #check if model was saved
 

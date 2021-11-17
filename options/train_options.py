@@ -79,3 +79,6 @@ class TrainOptions(BaseOptions):
         # added by Marc
         self.parser.add_argument("--L1_loss", action="store_true",
                                 help="specifies to use L1 loss for training/fine-tuning")
+
+        self.parser.add_argument("--constrain_output", action="store_true",
+                                help="specifies whether to also constrain output between consecutive frames")
