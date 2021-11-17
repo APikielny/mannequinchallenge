@@ -682,7 +682,7 @@ class Pix2PixModel(base_model.BaseModel):
         latent2 = self.get_latent(input_list[1], targets_list[1])
 
         # weight for constraint loss on output frames vs latent frames
-        output_weight = 0.000001
+        output_weight = 0.000000001
         output1 = self.get_output(input_list[0], targets_list[0])
         output2 = self.get_output(input_list[1], targets_list[1])
 
@@ -693,7 +693,7 @@ class Pix2PixModel(base_model.BaseModel):
         if use_L1_loss:
             loss = self.L1(latent1, latent2) + output_weight * self.L1(output1, output2)
         else: 
-            loss = self.L2(latent1, latent2) + output_weight * self.L2(output1, output2)
+            loss = self.L2(latent1, latent2) + output_weight * torch.sqrt(self.L2(output1, output2))
 
         self.optimizer_G.zero_grad()
         loss.backward()
