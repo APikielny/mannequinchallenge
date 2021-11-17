@@ -75,3 +75,7 @@ class TrainOptions(BaseOptions):
                                  help='which videos to use for testing, options rotate, translate, static')
 
         self.isTrain = True
+
+        # added by Marc
+        self.parser.add_argument("--L1_loss", action="store_true",
+                                help="specifies to use L1 loss for training/fine-tuning")

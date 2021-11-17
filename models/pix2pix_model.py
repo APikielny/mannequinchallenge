@@ -631,7 +631,10 @@ class Pix2PixModel(base_model.BaseModel):
     def L2(self, a, b):
         return torch.sum((a - b) ** 2)
 
-    def latent_train(self, input_list, targets_list):
+    def L1(self, a, b):
+        return torch.sum(torch.abs(a-b))
+
+    def latent_train(self, input_list, targets_list, use_L1_loss):
         latent1 = self.get_latent(input_list[0], targets_list[0])
         latent2 = self.get_latent(input_list[1], targets_list[1])
 
@@ -639,7 +642,10 @@ class Pix2PixModel(base_model.BaseModel):
             '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
         # just using L2 loss between the two latents for now
-        loss = self.L2(latent1, latent2)
+        if use_L1_loss:
+            loss = self.L1(latent1, latent2)
+        else: 
+            loss = self.L2(latent1, latent2)
         # loss = torch.mean(latent1 - latent2)
         # print("loss: ", loss)
 

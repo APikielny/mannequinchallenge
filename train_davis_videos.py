@@ -88,14 +88,14 @@ for i, data in enumerate(video_dataset):
     targets_list = target['img_1_path']
     target_1 = {'img_1_path': [targets_list[0]]}
     if(prev_frame is not None):
-        model.latent_train([prev_frame, img_1], [prev_target, target_1])
+        model.latent_train([prev_frame, img_1], [prev_target, target_1], opt.L1_loss)
 
     # then constrain (b, c)
     if (img.shape[0] > 1):  # if there is actually a full batch
         img_2 = img[1, :, :, :].unsqueeze(0)
         target_2 = {'img_1_path': [targets_list[1]]}
         targets = [target_1, target_2]
-        model.latent_train([img_1, img_2], targets)
+        model.latent_train([img_1, img_2], targets, opt.L1_loss)
         prev_target = target_2  # set c to the prev, so it will be used for next constraint
         prev_frame = img_2
     else:
