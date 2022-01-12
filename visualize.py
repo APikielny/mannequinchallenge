@@ -70,41 +70,83 @@ def visualize(visualisation_feature_map, input_, videoType, frameName):
     #     print(self.seq)
 
     if(view_feature_maps):
-        # print('visualizing')
+        # Shows latent outputs for both Seq blocks, final output is vertically stacked
+        show_both_latent_outputs = True
 
+        # print('visualizing')
         # this is a list of all the layers that had the hook called
         # print(list(visualisation_feature_map.values())[0].size())
         # print(list(visualisation_feature_map.values())[1].size())
+        if (show_both_latent_outputs) :
+            # getlayer (both 0 and 1 module in Channel 1)
+            latent0 = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()
+            latent1 = list(visualisation_feature_map.values())[1][0,:,:,:].cpu().detach()#.numpy()
 
-        # get a layer (Pick between 0 or 1 module in Channel 1)
-        # latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()
-        latent = list(visualisation_feature_map.values())[1][0,:,:,:].cpu().detach()#.numpy()
+            # SKLearn produces more consistent results
+            useSkLearn = True
+            if(useSkLearn):
+                latent_vis0 = visualize_layer_sklearn(latent0)
+                latent_vis1 = visualize_layer_sklearn(latent1)
+            else:
+                latent_vis0 = visualize_layer(latent0)
+                latent_vis1 = visualize_layer(latent1)
 
-        # SKLearn produces more consistent results
-        useSkLearn = True
-        if(useSkLearn):
-            latent_vis = visualize_layer_sklearn(latent)
-        else:
-            latent_vis = visualize_layer(latent)
+            # using np.ptp to max-min normalize
+            latent_vis0 = (latent_vis0 - latent_vis0.min())/np.ptp(latent_vis0)
+            latent_vis0 = latent_vis0 * 255.0
 
-        # using np.ptp to max-min normalize
-        latent_vis = (latent_vis - latent_vis.min())/np.ptp(latent_vis)
-        latent_vis = latent_vis * 255.0
+            latent_vis1 = (latent_vis1 - latent_vis1.min())/np.ptp(latent_vis1)
+            latent_vis1 = latent_vis1 * 255.0
 
-        if useSkLearn:
-            img = cv2.merge((latent_vis[:, :, 0], latent_vis[:, :, 1], latent_vis[:, :, 2]))
-        else:
-            img = cv2.merge((latent_vis[0], latent_vis[1], latent_vis[2]))
+            if useSkLearn:
+                img0 = cv2.merge((latent_vis0[:, :, 0], latent_vis0[:, :, 1], latent_vis0[:, :, 2]))
+                img1 = cv2.merge((latent_vis1[:, :, 0], latent_vis1[:, :, 1], latent_vis1[:, :, 2]))
+            else:
+                img0 = cv2.merge((latent_vis0[0], latent_vis0[1], latent_vis0[2]))
+                img1 = cv2.merge((latent_vis1[0], latent_vis1[1], latent_vis1[2]))
 
-        # Upscaling so a bit easier to see
-        scaleFactor = 4
-        img = cv2.resize(img, (64 * scaleFactor, 36 * scaleFactor))
+            # Upscaling so a bit easier to see
+            scaleFactor = 4
+            img0 = cv2.resize(img0, (64 * scaleFactor, 36 * scaleFactor))
+            img1 = cv2.resize(img1, (64 * scaleFactor, 36 * scaleFactor))
 
-        folder_path = os.path.join(os.getcwd(), "latent_images", videoType)
-        # create directory if it does not exist
-        if(not os.path.exists(folder_path)):
-            os.makedirs(folder_path)
+            folder_path = os.path.join(os.getcwd(), "latent_images", videoType)
+            # create directory if it does not exist
+            if(not os.path.exists(folder_path)):
+                os.makedirs(folder_path)
 
-        cv2.imwrite(os.path.join(folder_path, frameName + ".png"), img)
+            img = np.vstack((img0, img1))
+            cv2.imwrite(os.path.join(folder_path, frameName + ".png"), img)
+        else :
+            # get a layer (Pick between 0 or 1 module in Channel 1)
+            latent = list(visualisation_feature_map.values())[0][0,:,:,:].cpu().detach()
+            # latent = list(visualisation_feature_map.values())[1][0,:,:,:].cpu().detach()#.numpy()
+
+            # SKLearn produces more consistent results
+            useSkLearn = True
+            if(useSkLearn):
+                latent_vis = visualize_layer_sklearn(latent)
+            else:
+                latent_vis = visualize_layer(latent)
+
+            # using np.ptp to max-min normalize
+            latent_vis = (latent_vis - latent_vis.min())/np.ptp(latent_vis)
+            latent_vis = latent_vis * 255.0
+
+            if useSkLearn:
+                img = cv2.merge((latent_vis[:, :, 0], latent_vis[:, :, 1], latent_vis[:, :, 2]))
+            else:
+                img = cv2.merge((latent_vis[0], latent_vis[1], latent_vis[2]))
+
+            # Upscaling so a bit easier to see
+            scaleFactor = 4
+            img = cv2.resize(img, (64 * scaleFactor, 36 * scaleFactor))
+
+            folder_path = os.path.join(os.getcwd(), "latent_images", videoType)
+            # create directory if it does not exist
+            if(not os.path.exists(folder_path)):
+                os.makedirs(folder_path)
+
+            cv2.imwrite(os.path.join(folder_path, frameName + ".png"), img)
 
     return

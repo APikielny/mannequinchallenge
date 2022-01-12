@@ -5,6 +5,7 @@ import argparse
 import cv2
 import matplotlib.pyplot as plt
 from models import hourglass
+from scipy.ndimage.filters import gaussian_filter
 
 
 parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
@@ -67,13 +68,19 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         print("Error: check the input folder.")
         return
 
+    # Adding gaussian blur (NOTE: sigma is a hyperparam)
+    list = img_list.copy() # temp variable, so we can avoid append
+    for i in range(len(img_list)):
+        img_list[i] = gaussian_filter(list[i], sigma = 5)
+
     distances = []
     for i in range(len(img_list) - 2):
-        distances.append(np.sum(np.square(img_list[i] - img_list[i + 1])))
+        distances.append(np.sqrt(np.sum(np.square(img_list[i] - img_list[i + 1]))))
 
     # TODO normalize or not??
-    distances = (np.array(distances) - np.min(distances))
-    distances = distances / np.max(distances)
+    min = np.min(distances)
+    max = np.max(distances)
+    distances = (np.array(distances) - min) / (max-min)
 
     variance = np.var(np.array(distances))
 
