@@ -34,7 +34,7 @@ echo "
 #TODO if this model already exists, maybe skip?
 
 echo "training model..."
-python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} > /dev/null #the >/dev/null suppresses output from the python script
+python train_davis_videos.py --save_weights ${model_name} --marc_data_train ${model_data_train} --lr ${lr} > /dev/null #the >/dev/null suppresses output from the python script
 #check if model was saved
 
 FILE=checkpoints/test_local/${model_name}_net_G.pth
