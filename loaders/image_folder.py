@@ -273,8 +273,64 @@ class DAVISImageFolder(data.Dataset):
 
         final_img = torch.from_numpy(np.ascontiguousarray(
             img).transpose(2, 0, 1)).contiguous().float()
+        # (3, height, width)
 
         targets_1['img_1_path'] = h5_path
+
+        return final_img, targets_1
+
+    def __len__(self):
+        return len(self.img_list)
+
+# For supervision with MVS gt depth
+class SupervisionImageFolder(data.Dataset):
+
+    def __init__(self, list_path):
+        paths = make_dataset(list_path)
+        if len(paths) == 0:
+            raise(RuntimeError('Found 0 images in: ' + list_path))
+
+        # Parse img_list and depth_list
+        img_list = paths[::2]
+        depth_list = paths[1::2]
+
+        self.list_path = list_path
+        self.img_list = img_list
+        self.depth_list = depth_list
+
+        self.resized_height = 288
+        self.resized_width = 512
+
+        self.use_pp = True
+
+    def load_imgs(self, img_path):
+        img = imread(img_path)
+        img = np.float32(img)/255.0
+        img = transform.resize(img, (self.resized_height, self.resized_width))
+
+        return img
+
+    def __getitem__(self, index):
+        targets_1 = {}
+
+        h5_path =  self.img_list[index].rstrip()
+        img_path = self.img_list[index].rstrip()
+        depth_path = self.depth_list[index].rstrip()
+
+        img = self.load_imgs(img_path)
+        depth = self.load_imgs(depth_path)
+
+        gt_mask = np.float32(depth > 1e-8)
+
+        final_img = torch.from_numpy(np.ascontiguousarray(
+            img).transpose(2, 0, 1)).contiguous().float()
+        # (3, height, width)
+
+        targets_1['img_1_path'] = img_path
+        targets_1['depth_gt'] = torch.from_numpy(np.ascontiguousarray(
+            depth)).contiguous().float()
+        targets_1['gt_mask'] = torch.from_numpy(
+            np.ascontiguousarray(gt_mask)).contiguous().float()
 
         return final_img, targets_1
 

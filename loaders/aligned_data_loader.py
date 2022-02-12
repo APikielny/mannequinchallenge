@@ -22,7 +22,7 @@ class DAVISDataLoader():
         self.data_loader = torch.utils.data.DataLoader(dataset,
                                                        batch_size=_batch_size,
                                                        shuffle=False,
-                                                       num_workers=int(1))
+                                                       num_workers=int(1)) #TODO add sampler = ... here
         self.dataset = dataset
 
     def load_data(self):
@@ -49,6 +49,24 @@ class TUMDataLoader():
 
     def name(self):
         return 'TUMDataLoader'
+
+    def __len__(self):
+        return len(self.dataset)
+        
+class SupervisionDataLoader():
+    def __init__(self, list_path, _batch_size):
+        dataset = image_folder.SupervisionImageFolder(list_path=list_path)
+        self.data_loader = torch.utils.data.DataLoader(dataset,
+                                                       batch_size=_batch_size,
+                                                       shuffle=True,
+                                                       num_workers=int(1))
+        self.dataset = dataset
+
+    def load_data(self):
+        return self.data_loader
+
+    def name(self):
+        return 'SupervisionDataLoader'
 
     def __len__(self):
         return len(self.dataset)

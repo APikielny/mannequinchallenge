@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dis import dis
 import numpy as np
 import torch
 import torch.nn as nn
@@ -28,7 +29,6 @@ from models import loss
 
 
 import torchvision.utils as vutils
-
 
 # torch.manual_seed(1)
 class HourglassVariant(torch.nn.Module):
@@ -254,8 +254,7 @@ class Pix2PixModel(base_model.BaseModel):
 
     def backward_G(self, n_iter):
         # Combined loss
-        self.loss_joint = self.criterion_joint(self.input_images, self.prediction_d,
-                                               self.pred_confidence, self.targets)
+        self.loss_joint = self.criterion_joint(self.input_images, self.prediction_d, None, self.targets)
         print('Train loss is %f ' % self.loss_joint)
 
         # add to tensorboard
@@ -265,6 +264,7 @@ class Pix2PixModel(base_model.BaseModel):
                                self.loss_joint)
 
         self.loss_joint_var = self.criterion_joint.get_loss_var()
+        # print(type(self.loss_joint_var), self.loss_joint_var.size())
         self.loss_joint_var.backward()
 
     def optimize_parameters(self, n_iter):
@@ -640,11 +640,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         # just using L2 loss between the two latents for now
         loss = self.L2(latent1, latent2)
-        # loss = torch.mean(latent1 - latent2)
         # print("loss: ", loss)
-
-        # this works
-        # loss = torch.mean(torch.ones((3,3), requires_grad = True))
 
         # taken from optimize_parameters
         #####
@@ -652,11 +648,73 @@ class Pix2PixModel(base_model.BaseModel):
         # self.backward_G(0) #TODO check n_iters
         loss.backward()
         self.optimizer_G.step()
-        #####
 
-        # zero optimizer gradients
+    def depth_train(self, input, targets):
+        # stack_inputs = autograd.Variable(input.cuda(), requires_grad=True)
+        # prediction_d, pred_confidence = self.netG.forward(stack_inputs, targets)
+        # print("got pred d", prediction_d.shape)
+        # print("depth shape", depth.size())
+        # reshaped_pred = torch.reshape(prediction_d, (1, 288, 512))
+       
+        # loss = self.L2(reshaped_pred, depth)
+        # print(loss)
+        # ###########
+        # #optimize
+        # ##########
+        # self.optimizer_G.zero_grad()
+        # # self.backward_G(0) #TODO check n_iters
         # loss.backward()
-        # optimizer.step()
+        # self.optimizer_G.step()
+
+        self.input_images = autograd.Variable(input.cuda(), requires_grad=False)
+
+        self.prediction_d, self.pred_confidence = self.netG.forward(
+            self.input_images, targets)
+        self.prediction_d = self.prediction_d.squeeze(1)
+
+        self.targets = targets
+        
+        self.optimizer_G.zero_grad()
+        self.backward_G(1)
+
+    # Implementation of depth_train that increases effective batch size
+    # If we use batch size 4, but desired effective batch size is 16, then
+    # k = 16/4, and gradients are accumuluted before updating
+    def depth_train(self, i, input, targets, number_batches):
+        self.input_images = autograd.Variable(input.cuda(), requires_grad=False)
+
+        self.prediction_d, self.pred_confidence = self.netG.forward(
+            self.input_images, targets)
+        self.prediction_d = self.prediction_d.squeeze(1)
+
+        self.targets = targets
+        
+        self.optimizer_G.zero_grad()
+        self.backward_G(1)
+
+        k = 4
+        if ( (i+1) % k == 0 or (i+1) == number_batches):
+            self.optimizer_G.step()
+            self.optimizer_G.zero_grad()
+
+    def depth_and_latent_train(self, input_list, targets_list):
+        latent1 = self.get_latent(input_list[0], targets_list[0])
+        latent2 = self.get_latent(input_list[1], targets_list[1])
+
+        print("Constraining between: ", targets_list[0]['img_1_path'][0].split(
+            '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
+
+        # just using L2 loss between the two latents for now
+        loss = self.L2(latent1, latent2)
+        # print("loss: ", loss)
+
+        # taken from optimize_parameters
+        #####
+        self.optimizer_G.zero_grad()
+        # self.backward_G(0) #TODO check n_iters
+        loss.backward()
+        self.optimizer_G.step()
+
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)
@@ -668,6 +726,7 @@ class Pix2PixModel(base_model.BaseModel):
             stack_inputs, targets, visualize)
         pred_log_d = prediction_d.squeeze(1)
         pred_d = torch.exp(pred_log_d)
+        # pred_d = pred_log_d
 
         if not os.path.exists(save_path):
             os.makedirs(save_path)
@@ -689,10 +748,14 @@ class Pix2PixModel(base_model.BaseModel):
             output_path = youtube_dir + \
                 targets['img_1_path'][i].split('/')[-1]
             print("Output path: ", output_path)
-            disparity = 1. / pred_d_ref
+            # Added
+            disparity = pred_d_ref
+            disparity[disparity < 0] = 0
+            # disparity = 1. / pred_d_ref
             disparity = disparity / np.max(disparity)
             disparity = np.tile(np.expand_dims(disparity, axis=-1), (1, 1, 3))
             saved_imgs = np.concatenate((saved_img, disparity), axis=1)
+            saved_images = disparity
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
             imsave(output_path, saved_imgs)

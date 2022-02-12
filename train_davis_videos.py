@@ -33,6 +33,8 @@ else:
 
 eval_num_threads = 2
 video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
+# # [Supervision - Depth GT]
+# video_data_loader = aligned_data_loader.SupervisionDataLoader("/home/adam/Desktop/repos/adam-mannequinchallenge/test_data/supervision_list.txt", 1) # DELETE
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader))
@@ -79,11 +81,18 @@ global_step = 0
 
 prev_frame = None
 prev_target = None
+# TODO: Looking into dataloader to load with GT depth (either in pairs or separately?)
 for i, data in enumerate(video_dataset):
     # assume we have new pair (b, c), where prev frame was a
 
     # first, constrain curr frame with prev frame (a, b)
     img, target = data
+    
+    # # [Supervision - Depth GT]
+    # gt_depth = target['depth_gt']
+    # print(type(gt_depth)) # torch.Tensor
+    # print(gt_depth.size()) # (1, height=288, width=512)
+
     img_1 = img[0, :, :, :].unsqueeze(0)
     targets_list = target['img_1_path']
     target_1 = {'img_1_path': [targets_list[0]]}
@@ -102,8 +111,8 @@ for i, data in enumerate(video_dataset):
         break
 
 
-# model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
-# torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
+model.save_network(model.netG, 'G', "latent_constrained", model.gpu_ids) #using their .save_network() function
+torch.save(model.netG.module.cpu().state_dict(), 'checkpoints/test_local/'+str(time.time())+'latent_constrained_model_net_G.pth')
 save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'latent_constrained_model'

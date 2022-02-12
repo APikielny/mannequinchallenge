@@ -54,6 +54,11 @@ def init_weights(net, init_type='normal', gain=0.02):
 
     def init_func(m):
         classname = m.__class__.__name__
+
+        #this check added by Adam 1/12/22
+        if hasattr(m, 'weight') and m.weight is None:
+            return
+
         if hasattr(m, 'weight') and (classname.find('Conv') != -1 or
                                      classname.find('Linear') != -1):
             if init_type == 'normal':
@@ -172,7 +177,6 @@ class LaplacianLayer(nn.Module):
         elif input.dim() == 2:
             return x.squeeze(0).squeeze(0)
 
-
 class JointLoss(nn.Module):
 
     def __init__(self, opt):
@@ -181,10 +185,10 @@ class JointLoss(nn.Module):
         self.w_si_mse = 1.0
         self.w_l1_rel = 1.0
         self.w_confidence = 1.0
-        self.w_grad = 0.75
+        self.w_grad = 0.5
         self.w_sm = 0.1
-        self.w_sm1 = 0.075
-        self.w_sm2 = 0.1
+        self.w_sm1 = 0.05
+        self.w_sm2 = 0.05
         self.w_normal = 0.5
         self.num_scales = 5
         self.total_loss = None
@@ -248,14 +252,15 @@ class JointLoss(nn.Module):
 
     def GradientLoss(self, log_prediction_d, mask, log_gt):
         log_d_diff = log_prediction_d - log_gt
-
         v_gradient = torch.abs(log_d_diff[:, :-2, :] - log_d_diff[:, 2:, :])
         v_mask = torch.mul(mask[:, :-2, :], mask[:, 2:, :])
-        v_gradient = torch.mul(v_gradient, v_mask)
+        # v_gradient = torch.mul(v_gradient, v_mask)
+        v_gradient[v_mask == 0] = 0
 
         h_gradient = torch.abs(log_d_diff[:, :, :-2] - log_d_diff[:, :, 2:])
         h_mask = torch.mul(mask[:, :, :-2], mask[:, :, 2:])
-        h_gradient = torch.mul(h_gradient, h_mask)
+        # h_gradient = torch.mul(h_gradient, h_mask)
+        h_gradient[h_mask == 0] = 0
 
         N = torch.sum(h_mask) + torch.sum(v_mask) + EPSILON
 
@@ -289,14 +294,27 @@ class JointLoss(nn.Module):
         return gradient_loss
 
     def Data_Loss(self, log_prediction_d, mask, log_gt):
+        # print("In Data Loss")
+        # print(log_gt)
         N = torch.sum(mask) + EPSILON
+        # print(log_prediction_d[0][5])
+        # print(log_gt[0][5])
         log_d_diff = log_prediction_d - log_gt
-        log_d_diff = torch.mul(log_d_diff, mask)
+        # print(log_d_diff[0][5])
+        # log_d_diff = torch.mul(log_d_diff, mask)
+        # print("here ", log_d_diff[0][5])
+        # print(mask[0][5])
+        # print("INDEX OF NAN -", torch.isnan(log_d_diff[0][5]))
+
+        # This fixes -inf * 0 = nan
+        log_d_diff[mask == 0] = 0
+
         s1 = torch.sum(torch.pow(log_d_diff, 2)) / N
+        # print(s1)
         s2 = (torch.sum(log_d_diff) * torch.sum(log_d_diff)) / (N * N)
+        # print(s2)
 
         data_loss = s1 - s2
-
         return data_loss
 
     def Confidence_Loss(self, pred_confidence, mask, pred_d, gt_d):
@@ -491,12 +509,15 @@ class JointLoss(nn.Module):
 
         for i in range(0, gt_mask.size(0)):
             gt_d_np = d_gt[i, :, :].cpu().numpy()
-            pred_d_np = pred_d[i, :, :].cpu().numpy()
+            # pred_d_np = pred_d[i, :, :].cpu().numpy()
+            pred_d_np = pred_d[i, :, :].detach().cpu().numpy()
             gt_mask_np = gt_mask[i, :, :].cpu().numpy()
 
             scale_factor = np.linalg.lstsq(
                 np.expand_dims(pred_d_np[gt_mask_np > 1e-8], axis=-1),
                 gt_d_np[gt_mask_np > 1e-8])
+            print(type(scale_factor))
+            print(scale_factor)
             scale_factor = scale_factor[0][0]
 
             pred_d_aligned_np = pred_d_np * scale_factor
@@ -547,9 +568,9 @@ class JointLoss(nn.Module):
         log_d_gt_4 = log_d_gt_3[:, ::2, ::2]
 
         gt_mask = autograd.Variable(targets['gt_mask'].cuda(), requires_grad=False)
-        human_mask = 1.0 - \
-            autograd.Variable(targets['env_mask'].cuda(), requires_grad=False)
-        human_gt_mask = human_mask * gt_mask
+        # human_mask = 1.0 - \
+            # autograd.Variable(targets['env_mask'].cuda(), requires_grad=False)
+        # human_gt_mask = human_mask * gt_mask
 
         mask_0 = gt_mask
         mask_1 = mask_0[:, ::2, ::2]
@@ -565,7 +586,7 @@ class JointLoss(nn.Module):
         num_samples = mask_0.size(0)
 
         for i in range(0, num_samples):
-            if self.opt.human_data_term > 0.1:
+            if self.opt.human_data_term > 0.1: # Default options should jump to case 2
                 data_term += (self.w_si_mse / num_samples * self.Data_Loss(
                     log_pred_d_0[i, :, :], mask_0[i, :, :], log_d_gt_0[i, :, :]))
                 data_term += (self.w_si_mse / num_samples * 0.5 * self.Data_Human_Loss(
@@ -575,6 +596,8 @@ class JointLoss(nn.Module):
             else:
                 data_term += (self.w_si_mse / num_samples * 1.5 * self.Data_Loss(
                     log_pred_d_0[i, :, :], mask_0[i, :, :], log_d_gt_0[i, :, :]))
+                # print("Data Loss ", self.Data_Loss(
+                    # log_pred_d_0[i, :, :], mask_0[i, :, :], log_d_gt_0[i, :, :]))
 
         grad_term += self.w_grad * self.GradientLoss(log_pred_d_0, mask_0,
                                                      log_d_gt_0)
@@ -609,11 +632,13 @@ class JointLoss(nn.Module):
         sm_term += self.w_sm2 * 0.0625 * self.LaplacianSmoothnessLoss(
             log_pred_d_4, input_4)
 
-        print('data_term %f' % data_term.item())
-        print('grad_term %f' % grad_term.item())
-        print('sm_term %f' % sm_term.item())
+        # print('data_term %f' % data_term.item())
+        # print('grad_term %f' % grad_term.item())
+        # print('sm_term %f' % sm_term.item())
 
-        total_loss = data_term + grad_term + sm_term + confidence_term
+        # Loss Hyperparams stored in class attributes
+        total_loss = data_term + grad_term + sm_term
+        # total_loss = data_term
 
         self.total_loss = total_loss
 

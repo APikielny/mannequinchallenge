@@ -21,13 +21,15 @@ BATCH_SIZE = 1
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
-if opt.marc_data_inference is not None:
-    video_list = 'test_data/test_marc_video_list_' + opt.marc_data_inference + '.txt'
-else:
-    video_list = 'test_data/test_davis_video_list.txt'
+# if opt.marc_data_inference is not None:
+#     video_list = 'test_data/test_marc_video_list_' + opt.marc_data_inference + '.txt'
+# else:
+#     video_list = 'test_data/test_davis_video_list.txt'
 
-eval_num_threads = 2
-video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
+video_list = 'test_data/test_list.txt'
+
+eval_num_threads = 1
+video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader))
@@ -50,7 +52,7 @@ save_path = 'test_data/viz_predictions/'
 # print('save_path %s' % save_path)
 
 for i, data in enumerate(video_dataset):
-    # print(i)
+    print(i)
     stacked_img = data[0]
     targets = data[1]
     model.run_and_save_DAVIS(stacked_img, targets, save_path, opt.visualize)
