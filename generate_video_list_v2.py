@@ -34,8 +34,8 @@ print("number of ids for train_list.txt, ", len(all_dirs))
 b = open("./test_data/full_train_list.txt", "w")
 
 for id in all_dirs:
-    img_path = "/home/adam/Desktop/repos/mannequin-dataset/data-copy/" + id + "/images"
-    depth_path = "/home/adam/Desktop/repos/mannequin-dataset/data-copy/" + id + "/depth"
+    img_path = "/home/adam/Desktop/repos/mannequin-dataset/data-half/" + id + "/images"
+    depth_path = "/home/adam/Desktop/repos/mannequin-dataset/data-half/" + id + "/depth"
 
     img_files = os.listdir(img_path)
     depth_files = os.listdir(depth_path)
