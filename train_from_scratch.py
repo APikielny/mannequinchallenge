@@ -34,7 +34,7 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 # video_list = 'test_data/supervision_list.txt'
 
 torch.multiprocessing.set_sharing_strategy('file_system')
-video_list = 'test_data/full_train_list.txt'
+video_list = 'test_data/full_train_list_grid.txt'
 
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
@@ -107,7 +107,7 @@ save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
 torch.save(model.netG.module.cpu().state_dict(),
-           'checkpoints/test_local/' + save_weights + '_net_G.pth')
+           '/data/jhtlab/apikieln/mannequinchallenge/checkpoints/test_local/' + save_weights + '_net_G.pth')
 
 # python train_from_scratch.py --lr 0.0001 --save_weights overfit-small-set-0.0001
 # python test_davis_videos.py --weights overfit-small-set-0.0001
