@@ -26,7 +26,7 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 # else:
 #     video_list = 'test_data/test_davis_video_list.txt'
 
-video_list = 'test_data/test_list.txt'
+video_list = 'test_data/test_list_grid.txt'
 
 eval_num_threads = 1
 video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
