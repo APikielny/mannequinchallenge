@@ -27,11 +27,12 @@ for i in range(num_files):
     a.write(depth_path + "/" + depth_files[i] + "\n")
 #########################################################################################
 # Making train_list.txt for all ID
-all_dirs = os.listdir("/home/adam/Desktop/repos/mannequin-dataset/data-copy/")
+all_dirs = os.listdir("/home/adam/Desktop/repos/mannequin-dataset/data-half/")
 print("number of ids for train_list.txt, ", len(all_dirs))
 # print(all_dirs)
 
-b = open("./test_data/full_train_list.txt", "w")
+b = open("./test_data/temp_list.txt", "w")
+count = 0
 
 for id in all_dirs:
     img_path = "/home/adam/Desktop/repos/mannequin-dataset/data-half/" + id + "/images"
@@ -42,10 +43,12 @@ for id in all_dirs:
 
     if (len(img_files) != len(depth_files)):
         print("Number of img files and depth files is different - ", id, str(len(img_files)), str(len(depth_files)))
-        exit()
-    
-    num_files = len(img_files)
-    for i in range(num_files):
-        # Writing img path, and then depth path
-        b.write(img_path + "/" + img_files[i] + "\n")
-        b.write(depth_path + "/" + depth_files[i] + "\n")
+    else:
+        num_files = len(img_files)
+        count += num_files
+        for i in range(num_files):
+            # Writing img path, and then depth path
+            b.write(img_path + "/" + img_files[i] + "\n")
+            b.write(depth_path + "/" + depth_files[i] + "\n")
+
+print(count)
