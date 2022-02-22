@@ -328,7 +328,7 @@ class SupervisionImageFolder(data.Dataset):
             targets_1['next_frame'] = torch.from_numpy(np.ascontiguousarray(
             next_frame).transpose(2, 0, 1)).contiguous().float()
         else : # Placeholder value to show no next frame
-            targets_1["next_frame"] = torch.full((3, 288, 512), -1)
+            targets_1["next_frame"] = torch.full((3, 288, 512), -1).float()
 
         gt_mask = np.float32(depth > 1e-8)
 
