@@ -689,7 +689,6 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.targets = targets
         
-        self.optimizer_G.zero_grad()
         self.backward_G(1)
 
         k = 4
