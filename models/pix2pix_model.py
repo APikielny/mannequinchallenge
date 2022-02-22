@@ -70,6 +70,7 @@ class Pix2PixModel(base_model.BaseModel):
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
         self.weights = opt.weights
+        self.latent_constraint_weight = 1e-4
 
         self.mode = opt.mode
         if opt.input == 'single_view':
@@ -628,6 +629,12 @@ class Pix2PixModel(base_model.BaseModel):
         # pred_d = torch.exp(pred_log_d)
         return latent
 
+    def get_latent_v2(self, input, targets): # Removed cuda() call
+        latent = self.netG.forward(input, targets, False, True)
+        # pred_log_d = prediction_d.squeeze(1)
+        # pred_d = torch.exp(pred_log_d)
+        return latent
+
     def L2(self, a, b):
         return torch.sum((a - b) ** 2)
 
@@ -655,7 +662,7 @@ class Pix2PixModel(base_model.BaseModel):
         # print("got pred d", prediction_d.shape)
         # print("depth shape", depth.size())
         # reshaped_pred = torch.reshape(prediction_d, (1, 288, 512))
-       
+
         # loss = self.L2(reshaped_pred, depth)
         # print(loss)
         # ###########
@@ -673,7 +680,7 @@ class Pix2PixModel(base_model.BaseModel):
         self.prediction_d = self.prediction_d.squeeze(1)
 
         self.targets = targets
-        
+
         self.optimizer_G.zero_grad()
         self.backward_G(1)
 
@@ -688,14 +695,77 @@ class Pix2PixModel(base_model.BaseModel):
         self.prediction_d = self.prediction_d.squeeze(1)
 
         self.targets = targets
-        
-        self.optimizer_G.zero_grad()
+
+        # self.optimizer_G.zero_grad()
         self.backward_G(1)
 
         k = 1
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
+
+    # TODO: test with bigger batch
+    def compute_latent_loss(self, input, targets):
+        count = 0 # make sure to count only frames that have a valid next path
+        total_loss = 0
+
+        # print(img.shape) # [4, 3, 288, 512]
+        # print(target['next_frame'].shape) # [4, 3, 288, 512]
+
+        for i in range(input.shape[0]):
+            # Check if valid next frame
+            if (targets['next_frame'][i][0][0][0] != -1):
+                count += 1
+                #Get Latents
+                latent_1 = self.get_latent_v2(input, targets)
+                input_2 = targets["next_frame"][i]
+                input_2 = torch.unsqueeze(input_2, 0)
+                latent_2 = self.get_latent(input_2, targets)
+                total_loss += self.L2(latent_1, latent_2)
+
+        if (count == 0):
+            return 0
+        else:
+            return total_loss/count
+
+    def backward_G_latent(self, n_iter, input, targets):
+        # Combined loss
+        self.loss_joint = self.criterion_joint(self.input_images, self.prediction_d, None, self.targets)
+        print('Supervision Train loss is %f ' % self.loss_joint)
+
+        # add to tensorboard
+        if n_iter % 100 == 0:
+            self.write_summary('Train', self.input_images, self.prediction_d,
+                               self.pred_confidence, self.targets, n_iter,
+                               self.loss_joint)
+
+        self.loss_joint_var = self.criterion_joint.get_loss_var()
+
+        latent_loss = self.compute_latent_loss(input, targets)
+        print('Latent Train loss is ' + str(self.latent_constraint_weight * latent_loss))
+
+        combined_loss = self.loss_joint_var + self.latent_constraint_weight * latent_loss
+        combined_loss.backward()
+        # print(type(self.loss_joint_var), self.loss_joint_var.size())
+        # self.loss_joint_var.backward()
+
+    def depth_and_latent_train_v2(self, i, input, targets, number_batches):
+        self.input_images = autograd.Variable(input.cuda(), requires_grad=True)
+
+        self.prediction_d, self.pred_confidence = self.netG.forward(
+            self.input_images, targets)
+        self.prediction_d = self.prediction_d.squeeze(1)
+
+        self.targets = targets
+
+        # self.optimizer_G.zero_grad()
+        self.backward_G_latent(1, input, targets)
+
+        k = 1
+        if ( (i+1) % k == 0 or (i+1) == number_batches):
+            self.optimizer_G.step()
+            self.optimizer_G.zero_grad()
+
 
     def depth_and_latent_train(self, input_list, targets_list):
         latent1 = self.get_latent(input_list[0], targets_list[0])

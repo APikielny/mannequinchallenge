@@ -320,6 +320,16 @@ class SupervisionImageFolder(data.Dataset):
         img = self.load_imgs(img_path)
         depth = self.load_imgs(depth_path)
 
+        # Adding next frame as target if it exists
+        next_frame_id = int(img_path.split("/")[-1].split('.')[0][-4:])+1
+        next_frame_path = img_path[:img_path.rfind("frame")] + "frame" + str(next_frame_id).zfill(4) + ".jpg"
+        if (os.path.exists(next_frame_path)):
+            next_frame = self.load_imgs(next_frame_path)
+            targets_1['next_frame'] = torch.from_numpy(np.ascontiguousarray(
+            next_frame).transpose(2, 0, 1)).contiguous().float()
+        else : # Placeholder value to show no next frame
+            targets_1["next_frame"] = torch.full((3, 288, 512), -1)
+
         gt_mask = np.float32(depth > 1e-8)
 
         final_img = torch.from_numpy(np.ascontiguousarray(

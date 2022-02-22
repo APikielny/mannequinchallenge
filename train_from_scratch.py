@@ -23,7 +23,7 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = 16  # number of images to load in simultaneously from data loader
+BATCH_SIZE = 2  # number of images to load in simultaneously from data loader
 
 # import gc
 # gc.collect()
@@ -34,7 +34,7 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 # video_list = 'test_data/supervision_list.txt'
 
 torch.multiprocessing.set_sharing_strategy('file_system')
-video_list = 'test_data/full_train_list_grid.txt'
+video_list = 'test_data/supervision_list.txt'
 
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
@@ -90,7 +90,7 @@ global_step = 0
 #         model.depth_train(img, target)
 
 # new
-max_epochs = 10
+max_epochs = 1
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
@@ -101,13 +101,14 @@ for epoch in range(max_epochs):
         # model.depth_train(img, target)
         print("Batch index - ", i)
         model.depth_train(i, img, target, num_batches)
+        # model.depth_and_latent_train_v2(i, img, target, num_batches)
 
 
 save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
 torch.save(model.netG.module.cpu().state_dict(),
-           '/data/jhtlab/apikieln/mannequinchallenge/checkpoints/test_local/' + save_weights + '_net_G.pth')
+           'checkpoints/test_local/' + save_weights + '_net_G.pth')
 
 # python train_from_scratch.py --lr 0.0001 --save_weights overfit-small-set-0.0001
 # python test_davis_videos.py --weights overfit-small-set-0.0001
