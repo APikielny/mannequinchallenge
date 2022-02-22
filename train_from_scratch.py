@@ -92,7 +92,7 @@ global_step = 0
 #         model.depth_train(img, target)
 
 # new
-max_epochs = 1
+max_epochs = 10
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
@@ -101,7 +101,7 @@ for epoch in range(max_epochs):
     for i, data in enumerate(video_dataset):
         img, target = data
         # model.depth_train(img, target)
-        print("Batch index - ", i)
+        print("Batch index - ", i, " Epoch - ", epoch)
         model.depth_train(i, img, target, num_batches)
         # model.depth_and_latent_train_v2(i, img, target, num_batches)
         
@@ -111,13 +111,15 @@ for epoch in range(max_epochs):
         # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
         # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
         # exit()
-
+print("Finished training. ")
 
 save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
 torch.save(model.netG.module.cpu().state_dict(),
            '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
+
+print("Saved to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
 
 # python train_from_scratch.py --lr 0.0001 --save_weights overfit-small-set-0.0001
 # python test_davis_videos.py --weights overfit-small-set-0.0001
