@@ -34,8 +34,8 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 # video_list = 'test_data/supervision_list.txt'
 
 torch.multiprocessing.set_sharing_strategy('file_system')
-video_list = 'test_data/full_train_list_grid.txt'
-# video_list = 'test_data/small_train_list_grid.txt'
+video_list = 'test_data/single_pair_2.txt'
+# video_list = 'test_data/full_train_list_grid.txt'
 
 
 eval_num_threads = 2
@@ -104,6 +104,13 @@ for epoch in range(max_epochs):
         print("Batch index - ", i)
         model.depth_train(i, img, target, num_batches)
         # model.depth_and_latent_train_v2(i, img, target, num_batches)
+        
+        ########
+        # examining masks vs. depth values:
+        #######
+        # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
+        # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
+        # exit()
 
 
 save_weights = opt.save_weights
