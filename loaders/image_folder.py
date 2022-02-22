@@ -320,7 +320,8 @@ class SupervisionImageFolder(data.Dataset):
         img = self.load_imgs(img_path)
         depth = self.load_imgs(depth_path)
 
-        gt_mask = np.float32(depth > 1e-8)
+        # gt_mask = np.float32(depth > 1e-8)
+        gt_mask = np.float32(depth > 0.2)
 
         final_img = torch.from_numpy(np.ascontiguousarray(
             img).transpose(2, 0, 1)).contiguous().float()
