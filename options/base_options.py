@@ -58,7 +58,7 @@ class BaseOptions():
         self.parser.add_argument(
             '--nThreads', default=2, type=int, help='# threads for loading data')
         self.parser.add_argument('--checkpoints_dir', type=str,
-                                 default='checkpoints/', help='models are saved here')
+                                 default='../checkpoints/', help='models are saved here')
         self.parser.add_argument('--norm', type=str, default='instance',
                                  help='instance normalization or batch normalization')
         self.parser.add_argument('--serial_batches', action='store_true',
