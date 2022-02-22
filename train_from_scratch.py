@@ -92,7 +92,7 @@ global_step = 0
 #         model.depth_train(img, target)
 
 # new
-max_epochs = 10
+max_epochs = 1
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
@@ -103,6 +103,7 @@ for epoch in range(max_epochs):
         # model.depth_train(img, target)
         print("Batch index - ", i)
         model.depth_train(i, img, target, num_batches)
+        # model.depth_and_latent_train_v2(i, img, target, num_batches)
 
 
 save_weights = opt.save_weights
