@@ -7,8 +7,8 @@ import os
 id = "00abf2d3644c4b04"
 # img_path = "/home/adam/Desktop/repos/mannequin-dataset/data/00abf2d3644c4b04/images"
 # depth_path = "/home/adam/Desktop/repos/mannequin-dataset/data/00abf2d3644c4b04/depth"
-img_path = "/home/adam/Desktop/repos/mannequin-dataset/data/" + id + "/images"
-depth_path = "/home/adam/Desktop/repos/mannequin-dataset/data/" + id + "/depth"
+img_path = "/data/jhtlab/apikieln/mannequin-dataset/data-half/" + id + "/images"
+depth_path = "/data/jhtlab/apikieln/mannequin-dataset/data-half/" + id + "/depth"
 
 a = open("./test_data/supervision_list.txt", "w")
 
@@ -27,7 +27,7 @@ for i in range(num_files):
     a.write(depth_path + "/" + depth_files[i] + "\n")
 #########################################################################################
 # Making train_list.txt for all ID
-all_dirs = os.listdir("/home/adam/Desktop/repos/mannequin-dataset/data-half/")
+all_dirs = os.listdir("/data/jhtlab/apikieln/mannequin-dataset/data-half/")
 print("number of ids for train_list.txt, ", len(all_dirs))
 # print(all_dirs)
 
@@ -35,8 +35,8 @@ b = open("./test_data/temp_list.txt", "w")
 count = 0
 
 for id in all_dirs:
-    img_path = "/home/adam/Desktop/repos/mannequin-dataset/data-half/" + id + "/images"
-    depth_path = "/home/adam/Desktop/repos/mannequin-dataset/data-half/" + id + "/depth"
+    img_path = "/data/jhtlab/apikieln/mannequin-dataset/data-half/" + id + "/images"
+    depth_path = "/data/jhtlab/apikieln/mannequin-dataset/data-half/" + id + "/depth"
 
     img_files = os.listdir(img_path)
     depth_files = os.listdir(depth_path)
