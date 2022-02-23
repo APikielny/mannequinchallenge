@@ -96,6 +96,11 @@ max_epochs = 10
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
+save_interim_models = True
+save_weights = opt.save_weights
+if save_weights is None:
+    save_weights = str(time.time())+'train_from_scratch_model'
+
 
 for epoch in range(max_epochs):
     for i, data in enumerate(video_dataset):
@@ -111,11 +116,14 @@ for epoch in range(max_epochs):
         # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
         # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
         # exit()
+    
+    if save_interim_models:
+        print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+        torch.save(model.netG.module.cpu().state_dict(),
+           '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+
 print("Finished training. ")
 
-save_weights = opt.save_weights
-if save_weights is None:
-    save_weights = str(time.time())+'train_from_scratch_model'
 torch.save(model.netG.module.cpu().state_dict(),
            '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
 
