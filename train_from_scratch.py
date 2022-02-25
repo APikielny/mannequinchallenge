@@ -23,15 +23,15 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
-assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
-k = 16/BATCH_SIZE
-
 # import gc
 # gc.collect()
 # torch.cuda.empty_cache()
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
+
+BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
+assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
+k = 16/BATCH_SIZE
 
 # video_list = 'test_data/supervision_list.txt'
 
