@@ -748,7 +748,7 @@ class Pix2PixModel(base_model.BaseModel):
         # print(type(self.loss_joint_var), self.loss_joint_var.size())
         # self.loss_joint_var.backward()
 
-    def depth_and_latent_train_v2(self, i, input, targets, number_batches):
+    def depth_and_latent_train_v2(self, i, input, targets, number_batches, k):
         self.input_images = autograd.Variable(input.cuda(), requires_grad=True)
 
         self.prediction_d, self.pred_confidence = self.netG.forward(
@@ -760,7 +760,6 @@ class Pix2PixModel(base_model.BaseModel):
         # self.optimizer_G.zero_grad()
         self.backward_G_latent(1, input, targets)
 
-        k = 1
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()

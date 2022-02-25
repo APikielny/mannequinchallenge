@@ -23,7 +23,9 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = 8  # number of images to load in simultaneously from data loader
+BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
+assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
+k = 16/BATCH_SIZE
 
 # import gc
 # gc.collect()
@@ -36,7 +38,7 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
 video_list = 'test_data/full_train_list_grid.txt'
-#video_list = 'test_data/small_train_list_grid.txt'
+# video_list = 'test_data/small_train_list_grid.txt'
 test_video_list = 'test_data/test_list_grid.txt'
 
 
@@ -98,7 +100,7 @@ max_epochs = 10
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
-save_interim_models = True
+save_interim_results = False
 save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
@@ -108,8 +110,8 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        model.depth_train(i, img, target, num_batches)
-        # model.depth_and_latent_train_v2(i, img, target, num_batches)
+        # model.depth_train(i, img, target, num_batches)
+        model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         ########
         # examining masks vs. depth values:
@@ -120,7 +122,7 @@ for epoch in range(max_epochs):
     
     #TODO
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
-    if save_interim_models:
+    if save_interim_results:
         # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
         # torch.save(model.netG.module.cpu().state_dict(),
         #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
