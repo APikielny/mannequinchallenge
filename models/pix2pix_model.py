@@ -784,6 +784,10 @@ class Pix2PixModel(base_model.BaseModel):
         loss.backward()
         self.optimizer_G.step()
 
+    #hacky, for saving interim models while training
+    def run_and_save_DAVIS(self, input_, targets, save_path, visualize, weights):
+        self.weights = weights
+        self.run_and_save_DAVIS(input_, targets, save_path, visualize, weights)
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)

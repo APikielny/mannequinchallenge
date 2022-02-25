@@ -126,7 +126,7 @@ for epoch in range(max_epochs):
         #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
         model.switch_to_eval()
         save_path = 'test_data/viz_predictions/'
-        opt.weights = opt.save_weights+"_epoch_"+str(epoch) #hacky way to get proper path to save images to
+        weights = opt.save_weights+"_epoch_"+str(epoch) #hacky way to get proper path to save images to
         print('save_path %s' % save_path)
         
         print("Testing current model.")
@@ -137,7 +137,7 @@ for epoch in range(max_epochs):
             print(j)
             stacked_img_test = data_test[0]
             targets_test = data_test[1]
-            model.run_and_save_DAVIS(stacked_img_test, targets_test, save_path, opt.visualize)
+            model.run_and_save_DAVIS(stacked_img_test, targets_test, save_path, opt.visualize, weights)
 
         print("Switching back to train.")
         model.switch_to_train()
