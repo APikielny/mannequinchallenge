@@ -96,7 +96,7 @@ global_step = 0
 #         model.depth_train(img, target)
 
 # new
-max_epochs = 10
+max_epochs = opt.epochs
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
