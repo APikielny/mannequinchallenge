@@ -23,7 +23,7 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = 4  # number of images to load in simultaneously from data loader
+BATCH_SIZE = 16  # number of images to load in simultaneously from data loader
 
 # import gc
 # gc.collect()
@@ -36,7 +36,11 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
 video_list = 'test_data/full_train_list_grid.txt'
+<<<<<<< HEAD
 #video_list = 'test_data/small_train_list_grid.txt'
+=======
+# video_list = 'test_data/small_train_list_grid.txt'
+>>>>>>> 22aed98f80b7d15c19ccc5c19995cb8ac9b21119
 test_video_list = 'test_data/test_list_grid.txt'
 
 
