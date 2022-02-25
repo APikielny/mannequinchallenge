@@ -100,7 +100,7 @@ max_epochs = opt.epochs
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
-save_interim_results = False
+save_interim_results = True
 save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
