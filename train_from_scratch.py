@@ -23,7 +23,7 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = 16  # number of images to load in simultaneously from data loader
+BATCH_SIZE = 8  # number of images to load in simultaneously from data loader
 
 # import gc
 # gc.collect()
