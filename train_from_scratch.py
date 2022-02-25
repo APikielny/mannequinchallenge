@@ -137,7 +137,7 @@ for epoch in range(max_epochs):
             print(j)
             stacked_img_test = data_test[0]
             targets_test = data_test[1]
-            model.run_and_save_DAVIS(stacked_img_test, targets_test, save_path, opt.visualize, weights)
+            model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, weights)
 
         print("Switching back to train.")
         model.switch_to_train()
