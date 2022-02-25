@@ -35,7 +35,8 @@ opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-video_list = 'test_data/full_train_list_grid.txt'
+# video_list = 'test_data/full_train_list_grid.txt'
+video_list = 'test_data/small_train_list_grid.txt'
 test_video_list = 'test_data/test_list_grid.txt'
 
 
@@ -128,7 +129,7 @@ for epoch in range(max_epochs):
         print('save_path %s' % save_path)
         
         print("Testing current model.")
-        test_video_data_loader = aligned_data_loader.SupervisionDataLoader(test_video_list, BATCH_SIZE)
+        test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
         test_video_dataset = test_video_data_loader.load_data()
 
         for j, data_test in enumerate(test_video_dataset):
