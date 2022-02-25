@@ -698,7 +698,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.backward_G(1)
 
-        k = 4
+        k = 1
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
