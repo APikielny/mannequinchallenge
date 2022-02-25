@@ -784,11 +784,6 @@ class Pix2PixModel(base_model.BaseModel):
         loss.backward()
         self.optimizer_G.step()
 
-    #hacky, for saving interim models while training
-    def run_and_save_DAVIS(self, input_, targets, save_path, visualize, weights):
-        self.weights = weights
-        self.run_and_save_DAVIS(input_, targets, save_path, visualize)
-
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)
         input_imgs = autograd.Variable(input_.cuda(), requires_grad=False)
@@ -832,6 +827,12 @@ class Pix2PixModel(base_model.BaseModel):
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
             imsave(output_path, saved_imgs)
+    
+        #hacky, for saving interim models while training
+    def run_and_save_DAVIS_interim(self, input_, targets, save_path, visualize, weights):
+        self.weights = weights
+        self.run_and_save_DAVIS(input_, targets, save_path, visualize)
+        return
 
     def switch_to_train(self):
         self.netG.train()
