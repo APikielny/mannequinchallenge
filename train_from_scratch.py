@@ -100,9 +100,9 @@ print("Total number of batches: ", num_batches)
 for epoch in range(max_epochs):
     for i, data in enumerate(video_dataset):
         img, target = data
-        # model.depth_train(img, target)
-        print("Batch index - ", i)
-        model.depth_train(i, img, target, num_batches)
+        # print("Batch index - ", i)
+        # model.depth_train(i, img, target, num_batches)
+        print(target)
 
 
 save_weights = opt.save_weights
