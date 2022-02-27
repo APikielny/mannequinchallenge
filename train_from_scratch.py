@@ -145,6 +145,9 @@ for epoch in range(max_epochs):
         model.switch_to_train()
 
 print("Finished training. ")
+model.switch_to_eval()
+model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, opt.save_weights+"/final")
+model.switch_to_train()
 
 torch.save(model.netG.module.cpu().state_dict(),
            '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
