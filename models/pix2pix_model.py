@@ -70,7 +70,7 @@ class Pix2PixModel(base_model.BaseModel):
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
         self.weights = opt.weights
-        self.latent_constraint_weight = 1e-4
+        self.latent_constraint_weight = 1e-1
 
         self.mode = opt.mode
         if opt.input == 'single_view':
