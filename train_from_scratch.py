@@ -23,19 +23,23 @@ from models import networks
 import cv2
 import torch.multiprocessing
 
-BATCH_SIZE = 4  # number of images to load in simultaneously from data loader
-
 # import gc
 # gc.collect()
 # torch.cuda.empty_cache()
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
+BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
+assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
+k = 16/BATCH_SIZE
+
 # video_list = 'test_data/supervision_list.txt'
 
 torch.multiprocessing.set_sharing_strategy('file_system')
+# video_list = 'test_data/single_pair_2.txt' #for viewing masks
 video_list = 'test_data/full_train_list_grid.txt'
 # video_list = 'test_data/small_train_list_grid.txt'
+test_video_list = 'test_data/test_list_grid.txt'
 
 
 eval_num_threads = 2
@@ -92,24 +96,60 @@ global_step = 0
 #         model.depth_train(img, target)
 
 # new
-max_epochs = 10
+max_epochs = opt.epochs
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
 
+save_interim_results = True
+save_weights = opt.save_weights
+if save_weights is None:
+    save_weights = str(time.time())+'train_from_scratch_model'
 
 for epoch in range(max_epochs):
     for i, data in enumerate(video_dataset):
         img, target = data
-        # print("Batch index - ", i)
+        # model.depth_train(img, target)
+        print("Batch index - ", i, " Epoch - ", epoch)
         # model.depth_train(i, img, target, num_batches)
-        print(target)
+        model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        
+        ########
+        # examining masks vs. depth values:
+        #######
+        # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
+        # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
+        # exit()
+    
+    #TODO
+    #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
+    if save_interim_results:
+        # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+        # torch.save(model.netG.module.cpu().state_dict(),
+        #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+        model.switch_to_eval()
+        save_path = 'test_data/viz_predictions/'
+        weights = opt.save_weights+"_epoch_"+str(epoch) #hacky way to get proper path to save images to
+        print('save_path %s' % save_path)
+        
+        print("Testing current model.")
+        test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
+        test_video_dataset = test_video_data_loader.load_data()
 
+        for j, data_test in enumerate(test_video_dataset):
+            print(j)
+            stacked_img_test = data_test[0]
+            targets_test = data_test[1]
+            model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, weights)
 
-save_weights = opt.save_weights
-if save_weights is None:
-    save_weights = str(time.time())+'train_from_scratch_model'
+        print("Switching back to train.")
+        model.switch_to_train()
+
+print("Finished training. ")
+
 torch.save(model.netG.module.cpu().state_dict(),
            '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
+
+print("Saved to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
 
 # python train_from_scratch.py --lr 0.0001 --save_weights overfit-small-set-0.0001
 # python test_davis_videos.py --weights overfit-small-set-0.0001
