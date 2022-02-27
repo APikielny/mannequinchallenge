@@ -11,6 +11,8 @@ from scipy.ndimage.filters import gaussian_filter
 parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
 parser.add_argument('--L2_folder', type=str,
                     help='folder with frames')
+parser.add_argument('--epoch', type=int,
+                    help='if epoch is specified, go to that specific epoch within L2_folder')
 parser.add_argument('--weights_a', type=str,
                     help='to compare weights of two models')
 parser.add_argument('--weights_b', type=str,
@@ -103,7 +105,10 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
 
 args = parser.parse_args()
 if (args.L2_folder is not None):
-    L2_frame_consistency(args.L2_folder)
+    if (args.epoch is not None):
+        L2_frame_consistency(os.join(args.L2_folder, "epoch_" + str(args.epoch)))
+    else:
+        L2_frame_consistency(args.L2_folder)
 
 if (args.weights_a is not None and args.weights_b is not None):
     print(check_model_equality(torch.load(args.weights_a), torch.load(args.weights_b)))
