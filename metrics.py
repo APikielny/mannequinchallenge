@@ -79,9 +79,10 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
         cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
+    sigma = 1
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
     for i in range(len(depth_list)):
-        depth_list[i] = gaussian_filter(list[i], sigma = 5)
+        depth_list[i] = gaussian_filter(list[i], sigma)
         cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     distances = []
@@ -115,7 +116,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
 
     plt.title(name + ",\n Variance: " + str(variance)[:6])
     save_path = "L2_frame_comparisons/" + dataset + "/" + \
-        name + "_L2_plot.png"
+        name + "_L2_plot_sigma_" + str(sigma) + ".png"
     plt.savefig(save_path)
     print(save_path)
 
