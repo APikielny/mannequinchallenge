@@ -98,7 +98,8 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
        
 
         distance_img = depth_list[i] - depth_list[i + 1]
-        print(max(distance_img), np.mean(distance_img))
+        # print(np.amax(distance_img), np.mean(distance_img))
+        print(distance_img)
         distance_mask = distance_img.copy()
         distance_mask[distance_mask < threshold] = 0
         distance_mask[distance_mask != 0] = 1
