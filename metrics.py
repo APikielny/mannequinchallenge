@@ -75,15 +75,15 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     list = depth_list.copy() # temp variable, so we can avoid append
     
     ### visualizing differences between depths and images
-    for i in range(len(depth_list)):
-        cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
-        cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
+    # for i in range(len(depth_list)):
+    #     cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
+    #     cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     sigma = 1
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
     for i in range(len(depth_list)):
         depth_list[i] = gaussian_filter(list[i], sigma)
-        cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
+        # cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     distances = []
     for i in range(len(depth_list) - 2):
@@ -93,6 +93,14 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         ####################
 
         # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", depth_list[i] - depth_list[i + 1])
+
+        threshold = 0.5
+
+        distance_img = depth_list[i] - depth_list[i + 1]
+        distance_mask = distance_img.copy()
+        distance_mask[distance_mask < threshold] = 0
+        distance_mask[distance_mask != 0] = 1
+        cv2.imwrite("L2_frame_comparisons/visualizations/distance_mask" + str(i) + ".jpg", 255*distance_mask)
         ##################
 
     # TODO normalize or not??
