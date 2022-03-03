@@ -74,6 +74,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     list = img_list.copy() # temp variable, so we can avoid append
     for i in range(len(img_list)):
         img_list[i] = gaussian_filter(list[i], sigma = 5)
+        cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(img_list[i]))
 
     distances = []
     for i in range(len(img_list) - 2):
@@ -82,7 +83,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         ##trying to visualize differences to see if this metric makes sense
         ####################
 
-        cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", np.abs(img_list[i]/255 - img_list[i + 1]/255))
+        # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", np.abs(img_list[i] - img_list[i + 1]))
         ##################
 
     # TODO normalize or not??
