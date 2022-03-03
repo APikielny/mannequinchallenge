@@ -108,7 +108,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
 args = parser.parse_args()
 if (args.L2_folder is not None):
     if (args.epoch is not None):
-        L2_frame_consistency(os.join(args.L2_folder, "epoch_" + str(args.epoch)))
+        L2_frame_consistency(os.path.join(args.L2_folder, "epoch_" + str(args.epoch)))
     else:
         L2_frame_consistency(args.L2_folder)
 
