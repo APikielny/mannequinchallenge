@@ -53,6 +53,7 @@ def check_model_equality(weights_a, weights_b):
 # compare L2 distance between frames and plot through time
 def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
+    depth_list = []
     img_list = []
 
     for filename in os.listdir(folder):
@@ -62,28 +63,35 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     for filename in img_file_names:
         img = cv2.imread(os.path.join(folder, filename))
         if(cut_in_half):
-            img_list.append(img[:, 512:, :])
+            depth_list.append(img[:, 512:, :])
+            img_list.append(img[:, :512, :])
         else:
-            img_list.append(img)
+            depth_list.append(img)
 
-    if(len(img_list) < 2):
+    if(len(depth_list) < 2):
         print("Error: check the input folder.")
         return
+    
+    ### visualizing differences between depths and images
+    for i in range(len(depth_list)):
+        depth_list[i] = gaussian_filter(list[i], sigma = 5)
+        cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
+        cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
-    list = img_list.copy() # temp variable, so we can avoid append
-    for i in range(len(img_list)):
-        img_list[i] = gaussian_filter(list[i], sigma = 5)
-        cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(img_list[i]))
+    list = depth_list.copy() # temp variable, so we can avoid append
+    for i in range(len(depth_list)):
+        depth_list[i] = gaussian_filter(list[i], sigma = 5)
+        # cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     distances = []
-    for i in range(len(img_list) - 2):
-        distances.append(np.sqrt(np.sum(np.square(img_list[i] - img_list[i + 1]))))
+    for i in range(len(depth_list) - 2):
+        distances.append(np.sqrt(np.sum(np.square(depth_list[i] - depth_list[i + 1]))))
         ###################
         ##trying to visualize differences to see if this metric makes sense
         ####################
 
-        cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", img_list[i] - img_list[i + 1])
+        # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", depth_list[i] - depth_list[i + 1])
         ##################
 
     # TODO normalize or not??
