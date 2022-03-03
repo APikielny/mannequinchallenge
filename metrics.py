@@ -71,6 +71,8 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     if(len(depth_list) < 2):
         print("Error: check the input folder.")
         return
+
+    list = depth_list.copy() # temp variable, so we can avoid append
     
     ### visualizing differences between depths and images
     for i in range(len(depth_list)):
@@ -79,7 +81,6 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
-    list = depth_list.copy() # temp variable, so we can avoid append
     for i in range(len(depth_list)):
         depth_list[i] = gaussian_filter(list[i], sigma = 5)
         # cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
