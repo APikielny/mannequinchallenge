@@ -92,7 +92,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
 
     name = folder.split("/")[-1]
     dataset = folder.split("/")[-2]
-    if name == "":
+    if name == "" or args.epoch is not None:
         name = folder.split("/")[-2]
         dataset = folder.split("/")[-3]
 
