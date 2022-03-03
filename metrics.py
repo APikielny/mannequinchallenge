@@ -95,8 +95,10 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", depth_list[i] - depth_list[i + 1])
 
         threshold = 0.5
+       
 
         distance_img = depth_list[i] - depth_list[i + 1]
+        print(max(distance_img), np.mean(distance_img))
         distance_mask = distance_img.copy()
         distance_mask[distance_mask < threshold] = 0
         distance_mask[distance_mask != 0] = 1
