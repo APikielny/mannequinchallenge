@@ -94,6 +94,8 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     dataset = folder.split("/")[-2]
     if name == "" or args.epoch is not None:
         name = folder.split("/")[-2]
+        if args.epoch is not None:
+            name += "_epoch_str" + (args.epoch)
         dataset = folder.split("/")[-3]
 
     plt.title(name + ",\n Variance: " + str(variance)[:6])
