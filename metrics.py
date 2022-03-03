@@ -76,7 +76,6 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     
     ### visualizing differences between depths and images
     for i in range(len(depth_list)):
-        depth_list[i] = gaussian_filter(list[i], sigma = 5)
         cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
         cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
