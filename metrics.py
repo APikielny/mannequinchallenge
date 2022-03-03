@@ -78,6 +78,12 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     distances = []
     for i in range(len(img_list) - 2):
         distances.append(np.sqrt(np.sum(np.square(img_list[i] - img_list[i + 1]))))
+        ###################
+        ##trying to visualize differences to see if this metric makes sense
+        ####################
+
+        cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", np.abs(img_list[i] - img_list[i + 1]))
+        ##################
 
     # TODO normalize or not??
     min = np.min(distances)
