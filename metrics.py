@@ -91,6 +91,8 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     plt.ylabel("L2 between adjacent frames")
 
     name = folder.split("/")[-1]
+    if args.epoch is not None:
+        name += " epoch " + str(args.epoch)
     dataset = folder.split("/")[-2]
     if name == "":
         name = folder.split("/")[-2]
