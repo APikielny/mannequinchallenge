@@ -103,7 +103,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         # distance_mask = distance_img.copy()
         # distance_mask[distance_mask < threshold] = 0
         # distance_mask[distance_mask != 0] = 1
-        cv2.imwrite("L2_frame_comparisons/visualizations/distance_mask" + str(i) + ".jpg", 255*distance_mask)
+        # cv2.imwrite("L2_frame_comparisons/visualizations/distance_mask" + str(i) + ".jpg", 255*distance_mask)
         ##################
 
     # TODO normalize or not??
