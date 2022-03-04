@@ -79,35 +79,37 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     #     cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
     #     cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
 
-    sigma = 1
+    sigma = 3
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
     for i in range(len(depth_list)):
         depth_list[i] = gaussian_filter(list[i], sigma)
         # cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     distances = []
+    dist_vars = []
     for i in range(len(depth_list) - 2):
         distances.append(np.sqrt(np.sum(np.square(depth_list[i] - depth_list[i + 1]))))
+        dist_vars.append(np.var(depth_list[i] - depth_list[i + 1])) #variance across pixels of the difference
         ###################
         ##trying to visualize differences to see if this metric makes sense
         ####################
 
         # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", depth_list[i] - depth_list[i + 1])
 
-        threshold = 50
+        # threshold = 50
        
 
-        distance_img = depth_list[i] - depth_list[i + 1]
-        distance_mask = distance_img.copy()
-        distance_mask[distance_mask < threshold] = 0
-        distance_mask[distance_mask != 0] = 1
+        # distance_img = depth_list[i] - depth_list[i + 1]
+        # distance_mask = distance_img.copy()
+        # distance_mask[distance_mask < threshold] = 0
+        # distance_mask[distance_mask != 0] = 1
         cv2.imwrite("L2_frame_comparisons/visualizations/distance_mask" + str(i) + ".jpg", 255*distance_mask)
         ##################
 
     # TODO normalize or not??
-    min = np.min(distances)
-    max = np.max(distances)
-    distances = (np.array(distances) - min) / (max-min)
+    # min = np.min(distances)
+    # max = np.max(distances)
+    # distances = (np.array(distances) - min) / (max-min)
 
     variance = np.var(np.array(distances))
 
