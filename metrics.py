@@ -126,7 +126,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         dataset = folder.split("/")[-3]
 
     plt.title(name + ",\n Variance: " + str(variance)[:6])
-    save_path = "L2_frame_comparisons/" + dataset + "/" + \
+    save_path = "L2_frame_comparisons/" + dataset + "/not_normalized/" + \
         name + "_L2_plot_sigma_" + str(sigma) + ".png"
     plt.savefig(save_path)
     print(save_path)
