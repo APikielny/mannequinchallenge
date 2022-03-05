@@ -1,0 +1,2 @@
+/home/adam/Desktop/repos/mannequin-dataset/data-copy/77cb2354f18d5954/images/frame0000.jpg
+/home/adam/Desktop/repos/mannequin-dataset/data-copy/77cb2354f18d5954/depth/frame0000.jpg
