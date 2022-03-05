@@ -114,9 +114,17 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     variance = np.var(np.array(distances))
     mean_L2 = np.mean(np.array(distances))
 
-    plt.plot(distances)
+    plot_distances = True
+
+    if plot_distances:
+        make_plot(folder, distances, "L2 between adjacent frames", sigma, "L2")
+
+def make_plot(folder, data, ylabel, sigma, plot_type):
+    plt.plot(data)
     plt.xlabel("Frame")
-    plt.ylabel("L2 between adjacent frames")
+    plt.ylabel(ylabel)
+
+    mean_data = np.mean(np.array(data))
 
     name = folder.split("/")[-1]
     dataset = folder.split("/")[-2]
@@ -125,11 +133,11 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         if args.epoch is not None:
             name += "_epoch_" + str(args.epoch)
         dataset = folder.split("/")[-3]
-
+    
     # plt.title(name + ",\n Variance: " + str(variance)[:6])
-    plt.title(name + ",\n Mean: " + str(mean_L2))
-    save_path = "L2_frame_comparisons/" + dataset + "/not_normalized/" + \
-        name + "_L2_plot_sigma_" + str(sigma) + ".png"
+    plt.title(name + ",\n Mean: " + str(mean_data))
+    save_path = "Consistency_Metrics/" + dataset + "/not_normalized/" + \
+        name + "_" + plot_type +  "_plot_sigma_" + str(sigma) + ".png"
     plt.savefig(save_path)
     print(save_path)
 
