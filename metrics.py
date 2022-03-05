@@ -50,7 +50,7 @@ def check_model_equality(weights_a, weights_b):
             return False
     return True
 
-# compare L2 distance between frames and plot through time
+# compare differences between frames and plot through time. Can do L2 and variance plotting. 
 def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
     depth_list = []
@@ -111,13 +111,15 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     # max = np.max(distances)
     # distances = (np.array(distances) - min) / (max-min)
 
-    variance = np.var(np.array(distances))
-    mean_L2 = np.mean(np.array(distances))
 
     plot_distances = True
+    plot_variances = True
 
     if plot_distances:
         make_plot(folder, distances, "L2 between adjacent frames", sigma, "L2")
+    
+    if plot_variances:
+        make_plot(folder, dist_vars, "Variance of difference between adjacent frames", sigma, "Variance")
 
 def make_plot(folder, data, ylabel, sigma, plot_type):
     plt.plot(data)
