@@ -122,6 +122,7 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
         make_plot(folder, dist_vars, "Variance of difference between adjacent frames", sigma, "Variance")
 
 def make_plot(folder, data, ylabel, sigma, plot_type):
+    plt.clf()
     plt.plot(data)
     plt.xlabel("Frame")
     plt.ylabel(ylabel)
