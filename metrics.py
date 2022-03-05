@@ -11,6 +11,8 @@ from scipy.ndimage.filters import gaussian_filter
 parser = argparse.ArgumentParser(description='Metrics for consistent depth.')
 parser.add_argument('--L2_folder', type=str,
                     help='folder with frames')
+parser.add_argument('--epoch', type=int,
+                    help='if epoch is specified, go to that specific epoch within L2_folder')
 parser.add_argument('--weights_a', type=str,
                     help='to compare weights of two models')
 parser.add_argument('--weights_b', type=str,
@@ -48,9 +50,10 @@ def check_model_equality(weights_a, weights_b):
             return False
     return True
 
-# compare L2 distance between frames and plot through time
+# compare differences between frames and plot through time. Can do L2 and variance plotting. 
 def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
+    depth_list = []
     img_list = []
 
     for filename in os.listdir(folder):
@@ -60,50 +63,94 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     for filename in img_file_names:
         img = cv2.imread(os.path.join(folder, filename))
         if(cut_in_half):
-            img_list.append(img[:, 512:, :])
+            depth_list.append(img[:, 512:, :])
+            img_list.append(img[:, :512, :])
         else:
-            img_list.append(img)
+            depth_list.append(img)
 
-    if(len(img_list) < 2):
+    if(len(depth_list) < 2):
         print("Error: check the input folder.")
         return
 
+    list = depth_list.copy() # temp variable, so we can avoid append
+    
+    ### visualizing differences between depths and images
+    # for i in range(len(depth_list)):
+    #     cv2.imwrite("L2_frame_comparisons/visualizations/image_original_" + str(i) + ".jpg", np.abs(img_list[i]))
+    #     cv2.imwrite("L2_frame_comparisons/visualizations/depth_original_" + str(i) + ".jpg", np.abs(depth_list[i]))
+
+    sigma = 3
     # Adding gaussian blur (NOTE: sigma is a hyperparam)
-    list = img_list.copy() # temp variable, so we can avoid append
-    for i in range(len(img_list)):
-        img_list[i] = gaussian_filter(list[i], sigma = 5)
+    for i in range(len(depth_list)):
+        depth_list[i] = gaussian_filter(list[i], sigma)
+        # cv2.imwrite("L2_frame_comparisons/visualizations/sanitycheck" + str(i) + ".jpg", np.abs(depth_list[i]))
 
     distances = []
-    for i in range(len(img_list) - 2):
-        distances.append(np.sqrt(np.sum(np.square(img_list[i] - img_list[i + 1]))))
+    dist_vars = []
+    for i in range(len(depth_list) - 2):
+        distances.append(np.sqrt(np.sum(np.square(depth_list[i] - depth_list[i + 1]))))
+        dist_vars.append(np.var(depth_list[i] - depth_list[i + 1])) #variance across pixels of the difference
+        ###################
+        ##trying to visualize differences to see if this metric makes sense
+        ####################
+
+        # cv2.imwrite("L2_frame_comparisons/visualizations/frame" + str(i) + ".jpg", depth_list[i] - depth_list[i + 1])
+
+        # threshold = 50
+       
+
+        # distance_img = depth_list[i] - depth_list[i + 1]
+        # distance_mask = distance_img.copy()
+        # distance_mask[distance_mask < threshold] = 0
+        # distance_mask[distance_mask != 0] = 1
+        # cv2.imwrite("L2_frame_comparisons/visualizations/distance_mask" + str(i) + ".jpg", 255*distance_mask)
+        ##################
 
     # TODO normalize or not??
-    min = np.min(distances)
-    max = np.max(distances)
-    distances = (np.array(distances) - min) / (max-min)
+    # min = np.min(distances)
+    # max = np.max(distances)
+    # distances = (np.array(distances) - min) / (max-min)
 
-    variance = np.var(np.array(distances))
 
-    plt.plot(distances)
+    plot_distances = True
+    plot_variances = True
+
+    if plot_distances:
+        make_plot(folder, distances, "L2 between adjacent frames", sigma, "L2")
+    
+    if plot_variances:
+        make_plot(folder, dist_vars, "Variance of difference between adjacent frames", sigma, "Variance")
+
+def make_plot(folder, data, ylabel, sigma, plot_type):
+    plt.clf()
+    plt.plot(data)
     plt.xlabel("Frame")
-    plt.ylabel("L2 between adjacent frames")
+    plt.ylabel(ylabel)
+
+    mean_data = np.mean(np.array(data))
 
     name = folder.split("/")[-1]
     dataset = folder.split("/")[-2]
-    if name == "":
+    if name == "" or args.epoch is not None:
         name = folder.split("/")[-2]
+        if args.epoch is not None:
+            name += "_epoch_" + str(args.epoch)
         dataset = folder.split("/")[-3]
-
-    plt.title(name + ",\n Variance: " + str(variance)[:6])
-    save_path = "L2_frame_comparisons/" + dataset + "/" + \
-        name + "_L2_plot.png"
+    
+    # plt.title(name + ",\n Variance: " + str(variance)[:6])
+    plt.title(name + ",\n Mean: " + str(mean_data))
+    save_path = "Consistency_Metrics/" + dataset + "/not_normalized/" + \
+        name + "_" + plot_type +  "_plot_sigma_" + str(sigma) + ".png"
     plt.savefig(save_path)
     print(save_path)
 
 
 args = parser.parse_args()
 if (args.L2_folder is not None):
-    L2_frame_consistency(args.L2_folder)
+    if (args.epoch is not None):
+        L2_frame_consistency(os.path.join(args.L2_folder, "epoch_" + str(args.epoch)))
+    else:
+        L2_frame_consistency(args.L2_folder)
 
 if (args.weights_a is not None and args.weights_b is not None):
     print(check_model_equality(torch.load(args.weights_a), torch.load(args.weights_b)))

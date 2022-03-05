@@ -70,7 +70,7 @@ class Pix2PixModel(base_model.BaseModel):
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
         self.weights = opt.weights
-        self.latent_constraint_weight = 1e-4
+        self.latent_constraint_weight = 1e-2
 
         self.mode = opt.mode
         if opt.input == 'single_view':
@@ -698,7 +698,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.backward_G(1)
 
-        k = 4
+        k = 2
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
@@ -748,7 +748,7 @@ class Pix2PixModel(base_model.BaseModel):
         # print(type(self.loss_joint_var), self.loss_joint_var.size())
         # self.loss_joint_var.backward()
 
-    def depth_and_latent_train_v2(self, i, input, targets, number_batches):
+    def depth_and_latent_train_v2(self, i, input, targets, number_batches, k):
         self.input_images = autograd.Variable(input.cuda(), requires_grad=True)
 
         self.prediction_d, self.pred_confidence = self.netG.forward(
@@ -760,7 +760,6 @@ class Pix2PixModel(base_model.BaseModel):
         # self.optimizer_G.zero_grad()
         self.backward_G_latent(1, input, targets)
 
-        k = 1
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
@@ -783,7 +782,6 @@ class Pix2PixModel(base_model.BaseModel):
         # self.backward_G(0) #TODO check n_iters
         loss.backward()
         self.optimizer_G.step()
-
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)
@@ -828,6 +826,12 @@ class Pix2PixModel(base_model.BaseModel):
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
             imsave(output_path, saved_imgs)
+    
+        #hacky, for saving interim models while training
+    def run_and_save_DAVIS_interim(self, input_, targets, save_path, visualize, weights):
+        self.weights = weights
+        self.run_and_save_DAVIS(input_, targets, save_path, visualize)
+        return
 
     def switch_to_train(self):
         self.netG.train()

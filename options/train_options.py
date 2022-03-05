@@ -73,5 +73,11 @@ class TrainOptions(BaseOptions):
 
         self.parser.add_argument('--marc_data_inference', type=str,
                                  help='which videos to use for testing, options rotate, translate, static')
+        
+        self.parser.add_argument('--batch_size', type=int, default = 4,
+                                 help='batch size')
+        
+        self.parser.add_argument('--epochs', type=int, default = 2,
+                                 help='number of epochs to train for')
 
         self.isTrain = True
