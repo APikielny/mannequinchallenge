@@ -650,6 +650,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         # just using L2 loss between the two latents for now
         # loss = self.L2(latent1, latent2)
+        
         loss = self.L1(latent1, latent2)
         # print("loss: ", loss)
 
