@@ -650,7 +650,7 @@ class Pix2PixModel(base_model.BaseModel):
 
         # just using L2 loss between the two latents for now
         # loss = self.L2(latent1, latent2)
-        
+
         loss = self.L1(latent1, latent2)
         # print("loss: ", loss)
 
@@ -725,7 +725,8 @@ class Pix2PixModel(base_model.BaseModel):
                 input_2 = targets["next_frame"][i]
                 input_2 = torch.unsqueeze(input_2, 0)
                 latent_2 = self.get_latent(input_2, targets)
-                total_loss += self.L2(latent_1, latent_2)
+                # total_loss += self.L2(latent_1, latent_2)
+                total_loss += self.L1(latent_1, latent_2)
 
         if (count == 0):
             return 0
