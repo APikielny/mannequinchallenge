@@ -80,4 +80,7 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--epochs', type=int, default = 2,
                                  help='number of epochs to train for')
 
+        self.parser.add_argument('--plot_losses', action='store_true',
+                                 help='plot latent and supervision losses for each epoch')
+
         self.isTrain = True
