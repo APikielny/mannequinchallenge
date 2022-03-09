@@ -1,16 +1,26 @@
 import matplotlib.pyplot as plt
+import os
 
+#TODO also show scaled latent loss after weighting?
 def plot_losses(latent_loss, supervision_loss, title):
     plt.clf()
     plt.title(title)
-    plt.set_yscale('log')
-    plt.plot(latent_loss)
-    plt.plot(supervision_loss)
-    plt.xlabel(Epoch)
-    plt.ylabel(Loss)
-    plt.savefig('test_plot.png')
+    xint = range(0, len(latent_loss))
+    plt.xticks(xint)
+    plt.yscale('log')
+    plt.plot(latent_loss, label='Latent Loss')
+    plt.plot(supervision_loss, label='Supervision Loss')
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
 
+    graphs_folder = 'training_loss_graphs'
+    if not os.path.exists(graphs_folder):
+        os.makedirs(graphs_folder)
 
-latent_loss = [4.1, 0.4, 0.01, 0.001]
-supervision_loss = [0.2, 0.1, 0.12, 0.09]
-plot_losses(latent_loss, supervision_loss, "test plot")
+    plt.savefig(graphs_folder + '/Losses_plot_' + title +'.png')
+
+# testing this file
+# latent_loss = [4.1, 0.4, 0.01, 0.001]
+# supervision_loss = [0.2, 0.1, 0.12, 0.09]
+# plot_losses(latent_loss, supervision_loss, "test plot")
