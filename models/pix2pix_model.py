@@ -747,10 +747,10 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.loss_joint_var = self.criterion_joint.get_loss_var()
 
-        latent_loss = self.compute_latent_loss(input, targets)
-        print('Latent Train loss is ' + str(self.latent_constraint_weight * latent_loss))
+        self.latent_loss = self.compute_latent_loss(input, targets)
+        print('Latent Train loss is ' + str(self.latent_constraint_weight * self.latent_loss))
 
-        combined_loss = self.loss_joint_var + self.latent_constraint_weight * latent_loss
+        combined_loss = self.loss_joint_var + self.latent_constraint_weight * self.latent_loss
         combined_loss.backward()
         # print(type(self.loss_joint_var), self.loss_joint_var.size())
         # self.loss_joint_var.backward()
@@ -771,7 +771,7 @@ class Pix2PixModel(base_model.BaseModel):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
         
-        return self.compute_latent_loss(input, targets), self.loss_joint
+        return self.latent_loss, self.loss_joint
 
 
     def depth_and_latent_train(self, input_list, targets_list):
