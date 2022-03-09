@@ -22,6 +22,7 @@ from models import pix2pix_model
 from models import networks
 import cv2
 import torch.multiprocessing
+from plot_train_losses import plot_losses
 
 # import gc
 # gc.collect()
@@ -105,21 +106,31 @@ save_weights = opt.save_weights
 if save_weights is None:
     save_weights = str(time.time())+'train_from_scratch_model'
 
+latent_loss_list = []
+supervision_loss_list = []
 for epoch in range(max_epochs):
+    latent_loss_accum = 0
+    supervision_loss_accum = 0
+    counter = 0 #do I need this? can I just use i?
     for i, data in enumerate(video_dataset):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
         # model.depth_train(i, img, target, num_batches)
-        model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
+        counter += 1
+        latent_loss_accum += latent_loss
+        supervision_loss_accum += supervision_loss
         ########
         # examining masks vs. depth values:
         #######
         # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
         # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
         # exit()
-    
+    latent_loss_list.append(latent_loss_accum/i)
+    supervision_loss_list.append(supervision_loss_accum/i)
+
     #TODO
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
@@ -143,6 +154,10 @@ for epoch in range(max_epochs):
 
         print("Switching back to train.")
         model.switch_to_train()
+
+if opt.plot_losses:
+    #plot losses
+    plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
 
 print("Finished training. ")
 model.switch_to_eval()
