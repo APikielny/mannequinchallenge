@@ -829,6 +829,10 @@ class Pix2PixModel(base_model.BaseModel):
             disparity = np.tile(np.expand_dims(disparity, axis=-1), (1, 1, 3))
             saved_imgs = np.concatenate((saved_img, disparity), axis=1)
             saved_images = disparity
+
+            #debug original mannequin depth inversion
+            saved_imgs = 1.0 - saved_imgs
+
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
             imsave(output_path, saved_imgs)
