@@ -830,8 +830,8 @@ class Pix2PixModel(base_model.BaseModel):
             saved_imgs = np.concatenate((saved_img, disparity), axis=1)
             saved_images = disparity
 
-            #debug original mannequin depth inversion
-            saved_imgs = 1.0 - saved_imgs
+            # hack for original model outputting inverted depths
+            # saved_imgs = 1.0 - saved_imgs
 
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
