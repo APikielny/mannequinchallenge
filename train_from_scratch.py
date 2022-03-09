@@ -22,7 +22,7 @@ from models import pix2pix_model
 from models import networks
 import cv2
 import torch.multiprocessing
-import plot_train_losses
+from plot_train_losses import plot_losses
 
 # import gc
 # gc.collect()
@@ -157,7 +157,7 @@ for epoch in range(max_epochs):
 
 if opt.plot_losses:
     #plot losses
-    plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights)
+    plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
 
 print("Finished training. ")
 model.switch_to_eval()
