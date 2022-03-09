@@ -39,8 +39,8 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
 video_list = 'test_data/full_train_list_grid.txt'
 # video_list = 'test_data/small_train_list_grid.txt'
-test_video_list = 'test_data/test_list_grid.txt'
-
+# test_video_list = 'test_data/test_list_grid.txt'
+test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
