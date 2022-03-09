@@ -70,7 +70,7 @@ class Pix2PixModel(base_model.BaseModel):
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
         self.weights = opt.weights
-        self.latent_constraint_weight = 1e-2
+        self.latent_constraint_weight = 1e-1
 
         self.mode = opt.mode
         if opt.input == 'single_view':
@@ -649,9 +649,9 @@ class Pix2PixModel(base_model.BaseModel):
             '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
         # just using L2 loss between the two latents for now
-        # loss = self.L2(latent1, latent2)
+        loss = self.L2(latent1, latent2)
 
-        loss = self.L1(latent1, latent2)
+        # loss = self.L1(latent1, latent2)
         # print("loss: ", loss)
 
         # taken from optimize_parameters
@@ -725,8 +725,8 @@ class Pix2PixModel(base_model.BaseModel):
                 input_2 = targets["next_frame"][i]
                 input_2 = torch.unsqueeze(input_2, 0)
                 latent_2 = self.get_latent(input_2, targets)
-                # total_loss += self.L2(latent_1, latent_2)
-                total_loss += self.L1(latent_1, latent_2)
+                total_loss += self.L2(latent_1, latent_2)
+                # total_loss += self.L1(latent_1, latent_2)
 
         if (count == 0):
             return 0
