@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .filter import LowPassFilter1d, LowPassFilter2d
+#from .filter import LowPassFilter1d, LowPassFilter2d
+from filter import LowPassFilter1d, LowPassFilter2d
 
 class UpSample1d(nn.Module):
     def __init__(self, ratio=2):
@@ -45,6 +46,7 @@ class UpSample2d(nn.Module):
 
     def forward(self, x):
         shape = list(x.shape)
+        print(shape)
         new_shape = shape[:-2] + [shape[-2] * self.ratio
                                   ] + [shape[-1] * self.ratio]
 
@@ -52,8 +54,9 @@ class UpSample2d(nn.Module):
         #shape + [self.ratio**2], device=x.device)
         xx[..., ::self.ratio, ::self.ratio] = x
         xx = self.ratio**2 * xx
-        x = self.lowpass(xx)
-        return x
+        return xx
+        # x = self.lowpass(xx)
+        # return x
 
 
 class DownSample2d(nn.Module):
