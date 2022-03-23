@@ -119,9 +119,10 @@ for epoch in range(max_epochs):
         # model.depth_train(i, img, target, num_batches)
         latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
-        counter += 1
-        latent_loss_accum += latent_loss
-        supervision_loss_accum += supervision_loss
+        if (i%10000 == 0):
+            counter += 1
+            latent_loss_accum += latent_loss
+            supervision_loss_accum += supervision_loss
         ########
         # examining masks vs. depth values:
         #######
