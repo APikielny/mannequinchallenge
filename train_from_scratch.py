@@ -51,7 +51,7 @@ video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
-model = pix2pix_model.Pix2PixModel(opt)
+model = pix2pix_model.Pix2PixModel(opt, True)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
