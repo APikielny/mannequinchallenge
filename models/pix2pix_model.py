@@ -115,7 +115,8 @@ class Pix2PixModel(base_model.BaseModel):
             # TODO for some reason have to move this above parallel depending on my model vs. original models
             
             #commenting this out to try to remove weight initialization
-            # new_model.load_state_dict(model_parameters)
+            if not _isTrain:
+                new_model.load_state_dict(model_parameters)
 
             new_model = torch.nn.parallel.DataParallel(
                 new_model.cuda(), device_ids=range(torch.cuda.device_count()))
