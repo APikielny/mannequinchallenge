@@ -48,8 +48,8 @@ class HourglassVariant(torch.nn.Module):
         new_input_layer = torch.nn.Conv2d(
             num_input, 128, (7, 7), (1, 1), (3, 3))
 
-        # nn.init.normal_(new_input_layer.weight.data, 0.0, 0.02)
-        nn.init.constant_(new_input_layer.weight.data, 0.0)
+        nn.init.normal_(new_input_layer.weight.data, 0.0, 0.02)
+        # nn.init.constant_(new_input_layer.weight.data, 0.0)
         nn.init.constant_(new_input_layer.bias.data, 0.0)
 
         self.new_model = torch.nn.Sequential(new_input_layer, model)
