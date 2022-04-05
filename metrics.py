@@ -149,7 +149,7 @@ def consistency_over_time_fn(folder):
     
     plot_type = "Consistency_Over_Time"
 
-    plt.title("Consistency Over Epochs for Model ", + name)
+    plt.title("Consistency Over Epochs for Model " + str(name))
     save_path = "Consistency_Metrics/" + dataset + "/not_normalized/" + \
         name + "_" + plot_type + ".png"
     plt.savefig(save_path)
