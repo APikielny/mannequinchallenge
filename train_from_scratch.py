@@ -34,12 +34,34 @@ BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from d
 assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
 k = 16/BATCH_SIZE
 
-# video_list = 'test_data/supervision_list.txt'
 
+def save_interim_results_func(epoch_num):
+    # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+    # torch.save(model.netG.module.cpu().state_dict(),
+    #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
+    model.switch_to_eval()
+    save_path = 'test_data/viz_predictions/'
+    weights = opt.save_weights+"/epoch_"+str(epoch_num) #hacky way to get proper path to save images to
+    print('save_path %s' % save_path)
+    
+    print("Testing current model.")
+    test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
+    test_video_dataset = test_video_data_loader.load_data()
+
+    for j, data_test in enumerate(test_video_dataset):
+        print(j)
+        stacked_img_test = data_test[0]
+        targets_test = data_test[1]
+        model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, weights)
+
+    print("Switching back to train.")
+    model.switch_to_train()
+
+# video_list = 'test_data/supervision_list.txt'
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-video_list = 'test_data/full_train_list_grid.txt'
-#video_list = 'test_data/small_train_list_grid.txt'
+# video_list = 'test_data/full_train_list_grid.txt'
+video_list = 'test_data/small_train_list_grid.txt'
 # test_video_list = 'test_data/test_list_grid.txt'
 test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
@@ -108,6 +130,10 @@ if save_weights is None:
 
 latent_loss_list = []
 supervision_loss_list = []
+
+if save_interim_results:
+    save_interim_results_func("pre_train")
+
 for epoch in range(max_epochs):
     latent_loss_accum = 0
     supervision_loss_accum = 0
@@ -135,35 +161,17 @@ for epoch in range(max_epochs):
     #TODO
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
-        # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
-        # torch.save(model.netG.module.cpu().state_dict(),
-        #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
-        model.switch_to_eval()
-        save_path = 'test_data/viz_predictions/'
-        weights = opt.save_weights+"/epoch_"+str(epoch) #hacky way to get proper path to save images to
-        print('save_path %s' % save_path)
-        
-        print("Testing current model.")
-        test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
-        test_video_dataset = test_video_data_loader.load_data()
-
-        for j, data_test in enumerate(test_video_dataset):
-            print(j)
-            stacked_img_test = data_test[0]
-            targets_test = data_test[1]
-            model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, weights)
-
-        print("Switching back to train.")
-        model.switch_to_train()
+        save_interim_results_func(epoch)
 
 if opt.plot_losses:
     #plot losses
     plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
 
 print("Finished training. ")
-model.switch_to_eval()
-model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, opt.save_weights+"/final")
-model.switch_to_train()
+# model.switch_to_eval()
+# model.run_and_save_DAVIS_interim(stacked_img_test, targets_test, save_path, opt.visualize, opt.save_weights+"/final")
+# model.switch_to_train()
+save_interim_results_func("final")
 
 torch.save(model.netG.module.cpu().state_dict(),
            '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
