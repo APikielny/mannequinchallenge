@@ -86,39 +86,6 @@ global_step = 0
 
 #randomly initialize weights
 # networks.init_weights(model.netG)
-
-# img, target = data_frames[0]
-# img_1 = img[0, :, :, :].unsqueeze(0)
-# targets_list = target['img_1_path']
-# target_1 = {'img_1_path': [targets_list[0]]}
-
-# gt_depth = target['depth_gt']
-# gt_depth = gt_depth.cuda()
-# print(type(gt_depth))
-# print(gt_depth.size())
-
-# depth_path = '/home/adam/Desktop/repos/adam-mannequinchallenge/test_data/scratch_training_test/frame28_img.jpg'
-# depth_img = cv2.imread(depth_path, 0) #read as greyscale
-# torch_depth = torch.from_numpy(depth_img).cuda()
-# print("depth input shape: ", torch_depth.shape)
-
-# old
-# data_frames = {}
-# for i, data in enumerate(video_dataset):
-#     data_frames[i] = data
-
-# num_frames = len(data_frames)
-# print("number of frames: ", num_frames)
-
-# Doesn't support larger batch size currently
-# Switched to passing in target, so we have access to gt_mask
-# max_epochs = 1
-# for epoch in range(max_epochs):
-#     for i in range(num_frames):
-#         img, target = data_frames[i]
-#         model.depth_train(img, target)
-
-# new
 max_epochs = opt.epochs
 num_batches = len(video_data_loader)
 print("Total number of batches: ", num_batches)
