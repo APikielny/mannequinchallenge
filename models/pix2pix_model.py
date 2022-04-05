@@ -49,6 +49,7 @@ class HourglassVariant(torch.nn.Module):
             num_input, 128, (7, 7), (1, 1), (3, 3))
 
         nn.init.normal_(new_input_layer.weight.data, 0.0, 0.02)
+        # nn.init.constant_(new_input_layer.weight.data, 0.0)
         nn.init.constant_(new_input_layer.bias.data, 0.0)
 
         self.new_model = torch.nn.Sequential(new_input_layer, model)
@@ -113,7 +114,10 @@ class Pix2PixModel(base_model.BaseModel):
                         sys.exit()
 
             # TODO for some reason have to move this above parallel depending on my model vs. original models
-            new_model.load_state_dict(model_parameters)
+            
+            #commenting this out to try to remove weight initialization
+            if not _isTrain:
+                new_model.load_state_dict(model_parameters)
 
             new_model = torch.nn.parallel.DataParallel(
                 new_model.cuda(), device_ids=range(torch.cuda.device_count()))
