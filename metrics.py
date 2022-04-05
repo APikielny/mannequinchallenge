@@ -136,6 +136,7 @@ def consistency_over_time_fn(folder):
     #make plot of consistencies
     plt.clf()
     plt.plot(consistencies)
+    print("consistencies: ", consistencies)
     plt.xlabel("Epoch")
     plt.ylabel("L2 consistencies")
 
