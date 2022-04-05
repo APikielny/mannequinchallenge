@@ -128,11 +128,11 @@ def L2_frame_consistency(folder, cut_in_half=True, plot_distances=True, plot_var
 def consistency_over_time_fn(folder):
     curr_epoch = 0
     consistencies = []
-    print("just folder: ", folder)
-    print("test path: ", os.path.join(folder, "epoch_" + str(curr_epoch)))
+    # print("just folder: ", folder)
+    # print("test path: ", os.path.join(folder, "epoch_" + str(curr_epoch)))
     while (os.path.exists(os.path.join(folder, "epoch_" + str(curr_epoch)))):
         print("in while")
-        curr_consistency = L2_frame_consistency(folder, True, False, False)
+        curr_consistency = L2_frame_consistency((os.path.join(folder, "epoch_" + str(curr_epoch))), True, False, False)
         consistencies.append(curr_consistency['L2'])
         curr_epoch += 1
     
