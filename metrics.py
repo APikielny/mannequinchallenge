@@ -123,6 +123,7 @@ def L2_frame_consistency(folder, cut_in_half=True, plot_distances=True, plot_var
     metrics = {}
     metrics['L2'] = np.mean(np.array(distances))
     metrics['Variance'] = np.mean(np.array(dist_vars))
+    return metrics
 
 def consistency_over_time_fn(folder):
     curr_epoch = 0
