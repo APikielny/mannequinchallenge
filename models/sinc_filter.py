@@ -58,7 +58,7 @@ def create_kernel(img_width, radial=False):
     #cutoff, defined as f_c (in paper and code)
     #paper says f_c is s/2 for critical sampling, then moves to s/2 - f_h for non critical sampling
     # cutoff = s / 2
-    cutoff = s / 2# - in_half_width
+    cutoff = s / 2 - in_half_width
 
     upsample_filter = design_lowpass_filter(up_taps,cutoff,width,tmp_sampling_rate,radial)
     return upsample_filter
