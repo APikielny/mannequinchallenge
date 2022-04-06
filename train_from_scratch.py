@@ -125,7 +125,7 @@ for epoch in range(max_epochs):
     latent_loss_list.append(latent_loss_accum/i)
     supervision_loss_list.append(supervision_loss_accum/i)
 
-    #TODO
+ 
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
         save_interim_results_func(epoch)
