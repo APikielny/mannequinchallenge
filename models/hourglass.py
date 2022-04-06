@@ -19,6 +19,8 @@ import matplotlib.pyplot as plt
 import cv2
 import os
 
+from .resample_v2 import UpSample2d
+
 from visualize import visualize_layer, visualize, view_all_activation_maps
 
 
@@ -86,7 +88,8 @@ class Channels1(nn.Module):
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                nn.UpsamplingBilinear2d(scale_factor=2)
+                # Old Upsampling Filter
+                # nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # EEE
 
@@ -98,7 +101,8 @@ class Channels1(nn.Module):
             layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        return self.list[0](x)+self.list[1](x)
+        upsample = UpSample2d(ratio=2).cuda()
+        return self.list[0](x)+upsample(self.list[1](x))
 
 
 class Channels2(nn.Module):
@@ -119,7 +123,8 @@ class Channels2(nn.Module):
                 Channels1(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
-                nn.UpsamplingBilinear2d(scale_factor=2)
+                # Old Upsampling Filter
+                # nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # EE1EF
 
@@ -127,7 +132,8 @@ class Channels2(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        return self.list[0](x)+self.list[1](x)
+        upsample = UpSample2d(ratio=2).cuda()
+        return self.list[0](x)+upsample(self.list[1](x))
 
 
 class Channels3(nn.Module):
@@ -142,7 +148,8 @@ class Channels3(nn.Module):
                 Channels2(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                nn.UpsamplingBilinear2d(scale_factor=2)
+                # Old Upsampling Filter
+                # nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # BD2EG
         self.list.append(
@@ -156,7 +163,8 @@ class Channels3(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        return self.list[0](x)+self.list[1](x)
+        upsample = UpSample2d(ratio=2).cuda()
+        return upsample(self.list[0](x))+self.list[1](x)
 
 
 class Channels4(nn.Module):
@@ -171,7 +179,9 @@ class Channels4(nn.Module):
                 Channels3(),
                 inception(128, [[32], [3, 64, 32], [5, 64, 32], [7, 64, 32]]),
                 inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]]),
-                nn.UpsamplingBilinear2d(scale_factor=2)
+                # TODO: state_dict error if UpSample2d is here
+                # Old Upsampling filter
+                # nn.UpsamplingBilinear2d(scale_factor=2)
             )
         )  # BB3BA
         self.list.append(
@@ -184,7 +194,11 @@ class Channels4(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        return self.list[0](x)+self.list[1](x)
+        upsample = UpSample2d(ratio=2).cuda()
+        return upsample(self.list[0](x))+self.list[1](x)
+
+
+        # return self.list[0](x)+self.list[1](x)
 
 
 class HourglassModel(nn.Module):
