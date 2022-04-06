@@ -683,7 +683,7 @@ class Pix2PixModel(base_model.BaseModel):
         # loss.backward()
         # self.optimizer_G.step()
 
-        self.input_images = autograd.Variable(input.cuda(), requires_grad=False)
+        self.input_images = autograd.Variable(input.cuda(), requires_grad=True)
 
         self.prediction_d, self.pred_confidence = self.netG.forward(
             self.input_images, targets)
@@ -697,8 +697,8 @@ class Pix2PixModel(base_model.BaseModel):
     # Implementation of depth_train that increases effective batch size
     # If we use batch size 4, but desired effective batch size is 16, then
     # k = 16/4, and gradients are accumuluted before updating
-    def depth_train(self, i, input, targets, number_batches):
-        self.input_images = autograd.Variable(input.cuda(), requires_grad=False)
+    def depth_train(self, i, input, targets, number_batches, k):
+        self.input_images = autograd.Variable(input.cuda(), requires_grad=True)
 
         self.prediction_d, self.pred_confidence = self.netG.forward(
             self.input_images, targets)
@@ -708,7 +708,6 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.backward_G(1)
 
-        k = 2
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
