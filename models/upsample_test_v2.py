@@ -187,19 +187,46 @@ def downsample_testing_torch(img):
     with torch.no_grad():
         conv.weight = torch.nn.Parameter(kernel)
         blurred1 = conv(torch.reshape(downsampled[0, :, :], (1, 1, 250, 250)))
-        blurred2 = conv(torch.reshape(downsampled[0, :, :], (1, 1, 250, 250)))
-        blurred3 = conv(torch.reshape(downsampled[0, :, :], (1, 1, 250, 250)))
+        blurred2 = conv(torch.reshape(downsampled[1, :, :], (1, 1, 250, 250)))
+        blurred3 = conv(torch.reshape(downsampled[2, :, :], (1, 1, 250, 250)))
     blurred_combine = torch.stack([blurred1, blurred2, blurred3])
     print("shape combination", blurred_combine.shape)
     blurred_combine = torch.reshape(blurred_combine, (1, 3, 239, 239))
     print("shape combination post shift", blurred_combine.shape)
 
-
     save_image(blurred_combine/255, "test_img/downsampling/downsampled_baker_with_sinc_sinc_filter_torch_attempt.png")
+
+def upsample_testing_torch(img):
+    upsample = UpSample2d(ratio=2).cuda()
+    upsampled_image = upsample(img).cpu().float()
+
+    kernel = create_kernel(100/2, True).cpu().numpy()
+    kernel = torch.Tensor(np.reshape(kernel, (1, 1, 12, 12)))
+    kernel = torch.reshape(kernel, (1,1,12,12))
+    # kernel = kernel.repeat(1, 3, 1, 1)
+    # print("repeated kernel shape, ", kernel.shape)
+
+    # print("kernel type", type(kernel))
+    # print("image type", type(downsampled))
+
+
+    conv = nn.Conv2d(in_channels = 1, out_channels = 1, kernel_size=(1, 1, 12, 12), stride=1, bias=False)
+    with torch.no_grad():
+        conv.weight = torch.nn.Parameter(kernel)
+        blurred1 = conv(torch.reshape(upsampled_image[0, :, :], (1, 1, 1000, 1000)))
+        blurred2 = conv(torch.reshape(upsampled_image[1, :, :], (1, 1, 1000, 1000)))
+        blurred3 = conv(torch.reshape(upsampled_image[2, :, :], (1, 1, 1000, 1000)))
+    blurred_combine = torch.stack([blurred1, blurred2, blurred3])
+    print("shape combination", blurred_combine.shape)
+    blurred_combine = torch.reshape(blurred_combine, (1, 3, 989, 989))
+    print("shape combination post shift", blurred_combine.shape)
+
+    save_image(blurred_combine/255, "test_img/upsampled_baker_with_sinc_sinc_filter_torch_attempt.png")
 
 
 
 img = torchvision.io.read_image("test_img/small_baker.png").cuda() #, mode=torchvision.io.ImageReadMode.GRAY
 
 # upsample_testing(img)
-downsample_testing_torch(img)
+# downsample_testing_torch(img)
+upsample_testing_torch(img)
