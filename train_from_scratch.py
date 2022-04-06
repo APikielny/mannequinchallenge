@@ -109,8 +109,8 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        model.depth_train(i, img, target, num_batches)
-        # latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        # model.depth_train(i, img, target, num_batches, k)
+        latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         if (i%10000 == 0):
             counter += 1
