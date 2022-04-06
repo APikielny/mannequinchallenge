@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from torch import float16
 from .base_options import BaseOptions
 
 
@@ -79,5 +80,10 @@ class TrainOptions(BaseOptions):
         
         self.parser.add_argument('--epochs', type=int, default = 2,
                                  help='number of epochs to train for')
+
+        self.parser.add_argument('--plot_losses', action='store_true',
+                                 help='plot latent and supervision losses for each epoch')
+        self.parser.add_argument('--latent_weight', type=float,
+                                help='weight to use when combining latent and supervision losses')
 
         self.isTrain = True

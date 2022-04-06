@@ -49,6 +49,7 @@ class HourglassVariant(torch.nn.Module):
             num_input, 128, (7, 7), (1, 1), (3, 3))
 
         nn.init.normal_(new_input_layer.weight.data, 0.0, 0.02)
+        # nn.init.constant_(new_input_layer.weight.data, 0.0)
         nn.init.constant_(new_input_layer.bias.data, 0.0)
 
         self.new_model = torch.nn.Sequential(new_input_layer, model)
@@ -70,7 +71,8 @@ class Pix2PixModel(base_model.BaseModel):
     def __init__(self, opt, _isTrain=False):
         self.initialize(opt)
         self.weights = opt.weights
-        self.latent_constraint_weight = 1e-2
+        # self.latent_constraint_weight = 1e-1
+        self.latent_constraint_weight = opt.latent_weight
 
         self.mode = opt.mode
         if opt.input == 'single_view':
@@ -112,7 +114,10 @@ class Pix2PixModel(base_model.BaseModel):
                         sys.exit()
 
             # TODO for some reason have to move this above parallel depending on my model vs. original models
-            new_model.load_state_dict(model_parameters)
+            
+            #commenting this out to try to remove weight initialization
+            if not _isTrain:
+                new_model.load_state_dict(model_parameters)
 
             new_model = torch.nn.parallel.DataParallel(
                 new_model.cuda(), device_ids=range(torch.cuda.device_count()))
@@ -637,6 +642,9 @@ class Pix2PixModel(base_model.BaseModel):
 
     def L2(self, a, b):
         return torch.sum((a - b) ** 2)
+    
+    def L1(self, a, b):
+        return torch.sum(torch.abs(a - b))
 
     def latent_train(self, input_list, targets_list):
         latent1 = self.get_latent(input_list[0], targets_list[0])
@@ -647,6 +655,8 @@ class Pix2PixModel(base_model.BaseModel):
 
         # just using L2 loss between the two latents for now
         loss = self.L2(latent1, latent2)
+
+        # loss = self.L1(latent1, latent2)
         # print("loss: ", loss)
 
         # taken from optimize_parameters
@@ -720,6 +730,7 @@ class Pix2PixModel(base_model.BaseModel):
                 input_2 = torch.unsqueeze(input_2, 0)
                 latent_2 = self.get_latent(input_2, targets)
                 total_loss += self.L2(latent_1, latent_2)
+                # total_loss += self.L1(latent_1, latent_2)
 
         if (count == 0):
             return 0
@@ -739,10 +750,10 @@ class Pix2PixModel(base_model.BaseModel):
 
         self.loss_joint_var = self.criterion_joint.get_loss_var()
 
-        latent_loss = self.compute_latent_loss(input, targets)
-        print('Latent Train loss is ' + str(self.latent_constraint_weight * latent_loss))
+        self.latent_loss = self.compute_latent_loss(input, targets)
+        print('Latent Train loss is ' + str(self.latent_constraint_weight * self.latent_loss))
 
-        combined_loss = self.loss_joint_var + self.latent_constraint_weight * latent_loss
+        combined_loss = self.loss_joint_var + self.latent_constraint_weight * self.latent_loss
         combined_loss.backward()
         # print(type(self.loss_joint_var), self.loss_joint_var.size())
         # self.loss_joint_var.backward()
@@ -762,6 +773,8 @@ class Pix2PixModel(base_model.BaseModel):
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
+        
+        return self.latent_loss, self.loss_joint
 
 
     def depth_and_latent_train(self, input_list, targets_list):
@@ -822,6 +835,10 @@ class Pix2PixModel(base_model.BaseModel):
             disparity = np.tile(np.expand_dims(disparity, axis=-1), (1, 1, 3))
             saved_imgs = np.concatenate((saved_img, disparity), axis=1)
             saved_images = disparity
+
+            # hack for original model outputting inverted depths
+            # saved_imgs = 1.0 - saved_imgs
+
             saved_imgs = (saved_imgs*255).astype(np.uint8)
 
             imsave(output_path, saved_imgs)

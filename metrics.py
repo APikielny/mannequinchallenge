@@ -13,6 +13,8 @@ parser.add_argument('--L2_folder', type=str,
                     help='folder with frames')
 parser.add_argument('--epoch', type=int,
                     help='if epoch is specified, go to that specific epoch within L2_folder')
+parser.add_argument('--consistency_over_time', action="store_true",
+                    help='graph consistency over time (time = for each epoch in a folder)')
 parser.add_argument('--weights_a', type=str,
                     help='to compare weights of two models')
 parser.add_argument('--weights_b', type=str,
@@ -51,7 +53,7 @@ def check_model_equality(weights_a, weights_b):
     return True
 
 # compare differences between frames and plot through time. Can do L2 and variance plotting. 
-def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
+def L2_frame_consistency(folder, cut_in_half=True, plot_distances=True, plot_variances=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
     depth_list = []
     img_list = []
@@ -112,15 +114,52 @@ def L2_frame_consistency(folder, cut_in_half=True): # cut in half: if the frame 
     # distances = (np.array(distances) - min) / (max-min)
 
 
-    plot_distances = True
-    plot_variances = True
-
     if plot_distances:
         make_plot(folder, distances, "L2 between adjacent frames", sigma, "L2")
     
     if plot_variances:
         make_plot(folder, dist_vars, "Variance of difference between adjacent frames", sigma, "Variance")
+    
+    metrics = {}
+    metrics['L2'] = np.mean(np.array(distances))
+    metrics['Variance'] = np.mean(np.array(dist_vars))
+    return metrics
 
+def consistency_over_time_fn(folder):
+    curr_epoch = 0
+    consistencies = []
+    # print("just folder: ", folder)
+    # print("test path: ", os.path.join(folder, "epoch_" + str(curr_epoch)))
+    while (os.path.exists(os.path.join(folder, "epoch_" + str(curr_epoch)))):
+        print("in while")
+        curr_consistency = L2_frame_consistency((os.path.join(folder, "epoch_" + str(curr_epoch))), True, False, False)
+        consistencies.append(curr_consistency['L2'])
+        curr_epoch += 1
+    
+    #make plot of consistencies
+    plt.clf()
+    plt.plot(consistencies)
+    print("consistencies: ", consistencies)
+    plt.xlabel("Epoch")
+    plt.ylabel("L2 consistencies")
+
+    name = folder.split("/")[-1]
+    dataset = folder.split("/")[-2]
+    if name == "" or args.epoch is not None:
+        name = folder.split("/")[-2]
+        if args.epoch is not None:
+            name += "_epoch_" + str(args.epoch)
+        dataset = folder.split("/")[-3]
+    
+    plot_type = "Consistency_Over_Time"
+
+    plt.title("Consistency Over Epochs for Model " + str(name))
+    save_path = "Consistency_Metrics/" + dataset + "/not_normalized/" + \
+        name + "_" + plot_type + ".png"
+    plt.savefig(save_path)
+
+
+#make plots from consistency over a video (this just takes the data from L2_frame_consistency)
 def make_plot(folder, data, ylabel, sigma, plot_type):
     plt.clf()
     plt.plot(data)
@@ -147,10 +186,13 @@ def make_plot(folder, data, ylabel, sigma, plot_type):
 
 args = parser.parse_args()
 if (args.L2_folder is not None):
+    if args.consistency_over_time:
+        consistency_over_time_fn(args.L2_folder)
     if (args.epoch is not None):
         L2_frame_consistency(os.path.join(args.L2_folder, "epoch_" + str(args.epoch)))
     else:
-        L2_frame_consistency(args.L2_folder)
+        if not args.consistency_over_time:
+            L2_frame_consistency(args.L2_folder)
 
 if (args.weights_a is not None and args.weights_b is not None):
     print(check_model_equality(torch.load(args.weights_a), torch.load(args.weights_b)))
