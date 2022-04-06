@@ -158,6 +158,10 @@ class LowPassFilter2d(nn.Module):
                 mode='constant',
                 value=0)  # empirically, it is better than replicate or reflect
             #mode='replicate')
+
+        print("old kernel shape", self.filter.shape)
+        print("old stride", self.stride)
+
         if self.even:
             out = F.conv2d(x, self.filter, stride=self.stride)[..., :-1, :-1]
         else:

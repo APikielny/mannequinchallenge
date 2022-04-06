@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import cv2
 import os
 
-from .resample import UpSample2d
+from .resample_v2 import UpSample2d
 
 from visualize import visualize_layer, visualize, view_all_activation_maps
 

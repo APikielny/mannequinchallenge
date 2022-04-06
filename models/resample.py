@@ -54,8 +54,12 @@ class UpSample2d(nn.Module):
         #shape + [self.ratio**2], device=x.device)
         xx[..., ::self.ratio, ::self.ratio] = x
         xx = self.ratio**2 * xx
-        return xx
-        # x = self.lowpass(xx)
+
+        # print("xx shape", xx.shape)
+        x = self.lowpass(xx)
+
+        return x
+        # print("x shape", x.shape)
         # return x
 
 

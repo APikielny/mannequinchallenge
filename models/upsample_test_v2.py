@@ -9,7 +9,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 import cv2
 
-from alias_free_sinc_test import create_kernel
+from sinc_filter import create_kernel
 
 def gaussian_filter_fn(img):
     return torch.Tensor(gaussian_filter(img.cpu(), sigma=sigma_var))
