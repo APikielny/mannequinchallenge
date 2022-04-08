@@ -79,7 +79,7 @@ print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
 # model = pix2pix_model.Pix2PixModel(opt, True)
-model = pix2pix_model.Pix2PixModel(opt) #TODO change back to False for train from scratch!
+model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
