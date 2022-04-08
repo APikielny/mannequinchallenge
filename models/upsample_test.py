@@ -2,21 +2,24 @@ from random import gauss
 import torch, torchvision
 import torch.nn as nn
 from torchvision.utils import save_image
-from resample_v2 import UpSample2d
+from resample_v2 import UpSample2d, DownSample2d
 from filter import LowPassFilter2d
 import numpy as np
 
 img = torchvision.io.read_image("test_img/small_baker_rect.png").cuda() #, mode=torchvision.io.ImageReadMode.GRAY
 upsample = UpSample2d(ratio=2).cuda()
+downsample = DownSample2d(ratio=2).cuda()
 original_paper_upsample = nn.UpsamplingBilinear2d(scale_factor=2)
 
 img_reshaped = torch.unsqueeze(img, 0).float()
 # print(img.shape)
 # print(img_reshaped.shape)
-upsampled_image = upsample(img)
+# upsampled_image = upsample(img)
+# downsampled_image = nn.AvgPool2d(2)(img_reshaped)
+downsampled_image = downsample(img.float().cuda())
 # upsampled_image = original_paper_upsample(img_reshaped)
 # original_upsampled_image = original_paper_upsample(img_reshaped)
-save_image(upsampled_image/255, "test_img/test_in_new_model/baker_anti_alias_upsampled_new_sinc_radial_with_pad_rect_crit_sampling.png")
+save_image(downsampled_image/255, "test_img/test_in_new_model/baker_windowed_sinc_downsample.png")
 # save_image(original_upsampled_image/255, "baker_original_upsampled.png")
 
 # fft_image = torch.fft.fft2(img/255., dim = (1,2))

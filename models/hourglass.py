@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import cv2
 import os
 
-from .resample_v2 import UpSample2d
+from .resample_v2 import DownSample2d, UpSample2d
 
 from visualize import visualize_layer, visualize, view_all_activation_maps
 
@@ -84,7 +84,8 @@ class Channels1(nn.Module):
         )  # EE
         self.list.append(
             nn.Sequential(
-                nn.AvgPool2d(2),
+                #nn.AvgPool2d(2),
+                # DownSample2d(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
@@ -102,7 +103,8 @@ class Channels1(nn.Module):
 
     def forward(self, x):
         upsample = UpSample2d(ratio=2).cuda()
-        return self.list[0](x)+upsample(self.list[1](x))
+        downsample = DownSample2d().cuda()
+        return self.list[0](x)+upsample(self.list[1](downsample(x)))
 
 
 class Channels2(nn.Module):
@@ -117,7 +119,8 @@ class Channels2(nn.Module):
         )  # EF
         self.list.append(
             nn.Sequential(
-                nn.AvgPool2d(2),
+                #nn.AvgPool2d(2),
+                # DownSample2d(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 Channels1(),
@@ -133,7 +136,8 @@ class Channels2(nn.Module):
 
     def forward(self, x):
         upsample = UpSample2d(ratio=2).cuda()
-        return self.list[0](x)+upsample(self.list[1](x))
+        downsample = DownSample2d().cuda()
+        return self.list[0](x)+upsample(self.list[1](downsample(x)))
 
 
 class Channels3(nn.Module):
@@ -142,7 +146,8 @@ class Channels3(nn.Module):
         self.list = nn.ModuleList()
         self.list.append(
             nn.Sequential(
-                nn.AvgPool2d(2),
+                #nn.AvgPool2d(2),
+                # DownSample2d(),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 Channels2(),
@@ -164,7 +169,8 @@ class Channels3(nn.Module):
 
     def forward(self, x):
         upsample = UpSample2d(ratio=2).cuda()
-        return upsample(self.list[0](x))+self.list[1](x)
+        downsample = DownSample2d().cuda()
+        return upsample(self.list[0](downsample(x)))+self.list[1](x)
 
 
 class Channels4(nn.Module):
@@ -173,7 +179,8 @@ class Channels4(nn.Module):
         self.list = nn.ModuleList()
         self.list.append(
             nn.Sequential(
-                nn.AvgPool2d(2),
+                #nn.AvgPool2d(2),
+                # DownSample2d(),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 Channels3(),
@@ -195,7 +202,8 @@ class Channels4(nn.Module):
 
     def forward(self, x):
         upsample = UpSample2d(ratio=2).cuda()
-        return upsample(self.list[0](x))+self.list[1](x)
+        downsample = DownSample2d().cuda()
+        return upsample(self.list[0](downsample(x)))+self.list[1](x)
 
 
         # return self.list[0](x)+self.list[1](x)

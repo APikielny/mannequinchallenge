@@ -43,7 +43,7 @@ def create_kernel(img_width, radial=False):
     tmp_sampling_rate = max(s, s) * (1 if torgb else lrelu_upsampling) #a bit edited from their code
 
     up_factor = int(np.rint(tmp_sampling_rate / s))
-    print("computed upsampling factor: ", up_factor)
+    # print("computed upsampling factor: ", up_factor)
     # assert s * up_factor == tmp_sampling_rate
 
     #setting up_taps, from on their code

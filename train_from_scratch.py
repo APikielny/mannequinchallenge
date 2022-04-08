@@ -60,12 +60,14 @@ def save_interim_results_func(epoch_num):
 # video_list = 'test_data/supervision_list.txt'
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-# video_list = 'test_data/full_train_list_grid.txt'
-video_list = 'test_data/small_train_list_grid.txt'
+video_list = 'test_data/full_train_list_grid.txt'
 
 # test_video_list = 'test_data/test_list_grid.txt'
-# test_video_list = 'test_data/test_list_grid_adam_translate.txt'
-test_video_list = 'test_data/small_test_list_grid.txt'
+test_video_list = 'test_data/test_list_grid_adam_translate.txt'
+
+#for overfitting to one example:
+# video_list = 'test_data/small_train_list_grid.txt'
+# test_video_list = 'test_data/small_test_list_grid.txt'
 
 
 eval_num_threads = 2
@@ -76,7 +78,8 @@ video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
-model = pix2pix_model.Pix2PixModel(opt, True)
+# model = pix2pix_model.Pix2PixModel(opt, True)
+model = pix2pix_model.Pix2PixModel(opt) #TODO change back to False for train from scratch!
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True

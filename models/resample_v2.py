@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 #from .filter import LowPassFilter1d, LowPassFilter2d
-from filter import LowPassFilter1d, LowPassFilter2d
-from sinc_filter import design_lowpass_filter, create_kernel
+#from filter import LowPassFilter1d, LowPassFilter2d
+from .sinc_filter import design_lowpass_filter, create_kernel
 
 class LowPassWindowedSinc(nn.Module):
     def __init__(self,
@@ -16,6 +16,7 @@ class LowPassWindowedSinc(nn.Module):
     def forward(self, x):
         shape = list(x.shape)
         width = shape[-1]
+        height = shape[-2]
 
         kernel = create_kernel(width, True).cuda() #create kernel based on dims of x
         #separable (non radial) version:
@@ -39,8 +40,10 @@ class LowPassWindowedSinc(nn.Module):
             #mode='replicate')
         
         out = F.conv2d(x, self.filter)
-        new_shape = shape[:-2] + list(out.shape)[-2:] 
-        return out.reshape(new_shape) #undo the reshape
+        new_shape = shape[:-2] + [height, width]
+        cropped = out[:,:,:height,:width]
+        
+        return cropped.reshape(new_shape) #undo the reshape
 
 class UpSample2d(nn.Module):
     def __init__(self, ratio=2):
@@ -50,7 +53,7 @@ class UpSample2d(nn.Module):
 
     def forward(self, x):
         shape = list(x.shape)
-        print(shape)
+        # print(shape)
         new_shape = shape[:-2] + [shape[-2] * self.ratio
                                   ] + [shape[-1] * self.ratio]
 
@@ -59,6 +62,24 @@ class UpSample2d(nn.Module):
         xx[..., ::self.ratio, ::self.ratio] = x
         xx = self.ratio**2 * xx
         x = self.lowpass(xx)
+
+        # print("xx shape", xx.shape)
+        return x
+
+class DownSample2d(nn.Module):
+    def __init__(self, ratio=2):
+        super().__init__()
+        self.ratio = ratio
+        self.lowpass = LowPassWindowedSinc()
+
+    def forward(self, x):
+        shape = list(x.shape)
+        # print(shape)
+        new_shape = shape[:-2] + [shape[-2] * self.ratio
+                                  ] + [shape[-1] * self.ratio]
+
+        x = x[..., 1::self.ratio, 1::self.ratio] #adding the 1 removes the shift
+        x = self.lowpass(x)
 
         # print("xx shape", xx.shape)
         return x

@@ -44,7 +44,3 @@
 /data/jhtlab/apikieln/mannequin-dataset/data-half/77cb2354f18d5954/depth/frame0011.jpg
 /data/jhtlab/apikieln/mannequin-dataset/data-half/77cb2354f18d5954/images/frame0014.jpg
 /data/jhtlab/apikieln/mannequin-dataset/data-half/77cb2354f18d5954/depth/frame0014.jpg
-/data/jhtlab/apikieln/mannequin-dataset/data-half/0c919480a02dc3fa/images/frame0029.jpg
-/data/jhtlab/apikieln/mannequin-dataset/data-half/0c919480a02dc3fa/depth/frame0029.jpg
-/data/jhtlab/apikieln/mannequin-dataset/data-half/0c919480a02dc3fa/images/frame0000.jpg
-/data/jhtlab/apikieln/mannequin-dataset/data-half/0c919480a02dc3fa/depth/frame0000.jpg
