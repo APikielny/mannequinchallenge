@@ -231,6 +231,8 @@ class HourglassModel(nn.Module):
         frameName = split[-1][:-4]
         videoType = split[-2]
 
+        # TODO: Concat Input Image with XY Grid Here
+
         pred_feature = self.seq(input_)
 
         pred_d = self.pred_layer(pred_feature)
