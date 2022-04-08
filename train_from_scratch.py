@@ -64,7 +64,7 @@ def save_interim_results_func(epoch_num):
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
 # video_list = 'test_data/full_train_list_grid.txt'
-video_list = "test_data/temp_list.txt"
+video_list = "test_data/temp_list_5.txt"
 
 # test_video_list = 'test_data/test_list_grid.txt'
 test_video_list = 'test_data/test_list_grid_adam_translate.txt'
@@ -156,5 +156,5 @@ torch.save(model.netG.module.cpu().state_dict(),
 
 print("Saved to ", '../checkpoints/test_local/' + save_weights + '_net_G.pth')
 
-# python train_from_scratch.py --lr 0.0001 --save_weights xy-grid-single-image --epochs 100
-# python test_davis_videos.py --weights xy-grid-single-image
+# python train_from_scratch.py --lr 0.001 --save_weights fourier-features-multiple-images --epochs 200
+# python test_davis_videos.py --weights fourier-features-multiple-images
