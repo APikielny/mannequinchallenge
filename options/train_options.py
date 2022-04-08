@@ -85,5 +85,7 @@ class TrainOptions(BaseOptions):
                                  help='plot latent and supervision losses for each epoch')
         self.parser.add_argument('--latent_weight', type=float,
                                 help='weight to use when combining latent and supervision losses')
+        self.parser.add_argument('--train_from_scratch', action='store_true',
+                                help='if training from scratch, do not load an old model weights')
 
         self.isTrain = True
