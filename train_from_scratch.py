@@ -156,5 +156,5 @@ torch.save(model.netG.module.cpu().state_dict(),
 
 print("Saved to ", '../checkpoints/test_local/' + save_weights + '_net_G.pth')
 
-# python train_from_scratch.py --lr 0.0001 --save_weights fourier-overfit-single-image --epochs 100
-# python test_davis_videos.py --weights fourier-overfit-single-image
+# python train_from_scratch.py --lr 0.0001 --save_weights xy-grid-single-image --epochs 100
+# python test_davis_videos.py --weights xy-grid-single-image

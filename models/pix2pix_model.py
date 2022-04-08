@@ -824,7 +824,7 @@ class Pix2PixModel(base_model.BaseModel):
                 os.makedirs(youtube_dir)
 
             saved_img = np.transpose(
-                input_imgs[i, :, :, :].cpu().numpy(), (1, 2, 0))
+                input_imgs[i, 0:3, :, :].cpu().numpy(), (1, 2, 0))
 
             pred_d_ref = pred_d.data[i, :, :].cpu().numpy()
 

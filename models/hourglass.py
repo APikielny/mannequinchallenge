@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 
 import matplotlib.pyplot as plt
+import numpy as np
 import cv2
 import os
 
@@ -214,7 +215,8 @@ class HourglassModel(nn.Module):
         super(HourglassModel, self).__init__()
 
         self.seq = nn.Sequential(
-            nn.Conv2d(num_input, 128, 7, padding=3),
+            # nn.Conv2d(num_input, 128, 7, padding=3),
+            nn.Conv2d(5, 128, 7, padding = 3),
             nn.BatchNorm2d(128),
             nn.ReLU(True),
             Channels4(),
@@ -231,8 +233,7 @@ class HourglassModel(nn.Module):
         frameName = split[-1][:-4]
         videoType = split[-2]
 
-        # TODO: Concat Input Image with XY Grid Here
-
+        # X,Y Grid Concat Logic Moved to Data Loader
         pred_feature = self.seq(input_)
 
         pred_d = self.pred_layer(pred_feature)
