@@ -60,9 +60,8 @@ def save_interim_results_func(epoch_num):
 # video_list = 'test_data/supervision_list.txt'
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-video_list = 'test_data/full_train_list_grid.txt'
 
-# test_video_list = 'test_data/test_list_grid.txt'
+video_list = 'test_data/full_train_list_grid.txt'
 test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
@@ -77,9 +76,14 @@ video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
+if opt.train_from_scratch:
+    print("Training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, True)
+else:
+    print("Not training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, False)
 
-# model = pix2pix_model.Pix2PixModel(opt, True)
-model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
+# model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
@@ -115,30 +119,30 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        latent_loss, supervision_loss = model.depth_train(i, img, target, num_batches, k)
+        model.depth_train(i, img, target, num_batches, k)
         # latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
-        if (i%10000 == 0):
-            counter += 1
-            latent_loss_accum += latent_loss
-            supervision_loss_accum += supervision_loss
+        # if (i%10000 == 0):
+        #     counter += 1
+        #     latent_loss_accum += latent_loss
+        #     supervision_loss_accum += supervision_loss
         ########
         # examining masks vs. depth values:
         #######
         # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
         # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
         # exit()
-    latent_loss_list.append(latent_loss_accum/i)
-    supervision_loss_list.append(supervision_loss_accum/i)
+    # latent_loss_list.append(latent_loss_accum/i)
+    # supervision_loss_list.append(supervision_loss_accum/i)
 
     #TODO
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
         save_interim_results_func(epoch)
 
-if opt.plot_losses:
+# if opt.plot_losses:
     #plot losses
-    plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
+    # plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
 
 print("Finished training. ")
 # model.switch_to_eval()
