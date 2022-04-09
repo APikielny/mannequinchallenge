@@ -370,7 +370,7 @@ class GaussianFourierFeatureTransform(torch.nn.Module):
         return torch.cat([torch.sin(x), torch.cos(x)], dim=1)
 
 class HourglassModel(nn.Module):
-    def __init__(self, num_input):
+    def __init__(self, num_input, use_1x1_conv):
         super(HourglassModel, self).__init__()
 
         mapping_size = 128
