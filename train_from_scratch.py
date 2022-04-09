@@ -30,12 +30,9 @@ from plot_train_losses import plot_losses
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
-# BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
-# assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
-# k = 16/BATCH_SIZE
-BATCH_SIZE=1
-k=1
-
+BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
+assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
+k = 16/BATCH_SIZE
 
 def save_interim_results_func(epoch_num):
     # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
