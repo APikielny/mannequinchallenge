@@ -72,7 +72,9 @@ test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
 # video_dataset = video_data_loader.load_data()
+# NOTE: Pick data loader based on whether next frame needed (ex. for latent constraints)
 video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
+# video_data_loader = aligned_data_loader.SupervisionLatentDataLoader(video_list, BATCH_SIZE)
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
@@ -157,3 +159,5 @@ print("Saved to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weight
 
 # python train_from_scratch.py --lr 0.0001 --save_weights overfit-small-set-0.0001
 # python test_davis_videos.py --weights overfit-small-set-0.0001
+# python train_from_scratch.py --lr 0.001 --save_weights quick-test --epochs 25
+# python test_davis_videos.py --weights quick-test
