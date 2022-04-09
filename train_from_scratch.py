@@ -30,9 +30,11 @@ from plot_train_losses import plot_losses
 
 opt = TrainOptions().parse()  # set CUDA_VISIBLE_DEVICES before import torch
 
-BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
-assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
-k = 16/BATCH_SIZE
+# BATCH_SIZE = opt.batch_size  # number of images to load in simultaneously from data loader
+# assert ((BATCH_SIZE == 16) or (BATCH_SIZE == 8) or (BATCH_SIZE == 4) or (BATCH_SIZE == 2) or (BATCH_SIZE == 1))
+# k = 16/BATCH_SIZE
+BATCH_SIZE=1
+k=1
 
 
 def save_interim_results_func(epoch_num):
@@ -74,7 +76,9 @@ test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
 # video_dataset = video_data_loader.load_data()
+# NOTE: Pick data loader based on whether next frame needed (ex. for latent constraints)
 video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
+# video_data_loader = aligned_data_loader.SupervisionLatentDataLoader(video_list, BATCH_SIZE)
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
@@ -152,5 +156,5 @@ torch.save(model.netG.module.cpu().state_dict(),
 
 print("Saved to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + '_net_G.pth')
 
-# python train_from_scratch.py --lr 0.001 --save_weights fourier-features-multiple-images --epochs 200
-# python test_davis_videos.py --weights fourier-features-multiple-images
+# python train_from_scratch.py --lr 0.001 --save_weights quick-test --epochs 25
+# python test_davis_videos.py --weights quick-test

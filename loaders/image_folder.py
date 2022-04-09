@@ -332,6 +332,79 @@ class SupervisionImageFolder(data.Dataset):
         img = self.load_imgs(img_path)
         depth = self.load_imgs(depth_path)
 
+        # # Adding next frame as target if it exists
+        # next_frame_id = int(img_path.split("/")[-1].split('.')[0][-4:])+1
+        # next_frame_path = img_path[:img_path.rfind("frame")] + "frame" + str(next_frame_id).zfill(4) + ".jpg"
+        # if (os.path.exists(next_frame_path)):
+        #     next_frame = self.load_imgs(next_frame_path)
+        #     targets_1['next_frame'] = torch.from_numpy(np.ascontiguousarray(
+        #     next_frame).transpose(2, 0, 1)).contiguous().float()
+        #     targets_1['next_frame'] = torch.cat((targets_1['next_frame'], self.xy_grid), axis = 0)
+        # else : # Placeholder value to show no next frame
+        #     targets_1["next_frame"] = torch.full((5, 288, 512), -1).float()
+
+        gt_mask = np.float32(depth > 0.3)
+
+        final_img = torch.from_numpy(np.ascontiguousarray(
+            img).transpose(2, 0, 1)).contiguous().float()
+        # (3, height, width)
+        final_img = torch.cat((final_img, self.xy_grid), axis = 0)
+        # (5, height, width)
+
+        targets_1['img_1_path'] = img_path
+        targets_1['depth_gt'] = torch.from_numpy(np.ascontiguousarray(
+            depth)).contiguous().float()
+        targets_1['gt_mask'] = torch.from_numpy(
+            np.ascontiguousarray(gt_mask)).contiguous().float()
+
+        return final_img, targets_1
+
+    def __len__(self):
+        return len(self.img_list)
+
+# For supervision with MVS gt depth and Latent Constraint loss
+class SupervisionLatentImageFolder(data.Dataset):
+
+    def __init__(self, list_path):
+        paths = make_dataset(list_path)
+        if len(paths) == 0:
+            raise(RuntimeError('Found 0 images in: ' + list_path))
+
+        # Parse img_list and depth_list
+        img_list = paths[::2]
+        depth_list = paths[1::2]
+
+        self.list_path = list_path
+        self.img_list = img_list
+        self.depth_list = depth_list
+
+        self.resized_height = 288
+        self.resized_width = 512
+
+        x_coords = np.linspace(0, 1, self.resized_width, endpoint=False)
+        y_coords = np.linspace(0, 1, self.resized_height, endpoint=False)
+        xy_grid = np.stack(np.meshgrid(x_coords, y_coords), -1)
+        self.xy_grid = torch.tensor(xy_grid).permute(2, 0, 1).float().contiguous()
+
+        self.use_pp = True
+
+    def load_imgs(self, img_path):
+        img = imread(img_path)
+        img = np.float32(img)/255.0
+        img = transform.resize(img, (self.resized_height, self.resized_width))
+
+        return img
+
+    def __getitem__(self, index):
+        targets_1 = {}
+
+        h5_path =  self.img_list[index].rstrip()
+        img_path = self.img_list[index].rstrip()
+        depth_path = self.depth_list[index].rstrip()
+
+        img = self.load_imgs(img_path)
+        depth = self.load_imgs(depth_path)
+
         # Adding next frame as target if it exists
         next_frame_id = int(img_path.split("/")[-1].split('.')[0][-4:])+1
         next_frame_path = img_path[:img_path.rfind("frame")] + "frame" + str(next_frame_id).zfill(4) + ".jpg"

@@ -707,13 +707,13 @@ class Pix2PixModel(base_model.BaseModel):
         self.targets = targets
 
         self.backward_G(1)
-        self.latent_loss = self.compute_latent_loss(input, targets) #this is just used for graphing in this function (doesn't optimize basd on latent loss)
+        # self.latent_loss = self.compute_latent_loss(input, targets) #this is just used for graphing in this function (doesn't optimize basd on latent loss)
 
         if ( (i+1) % k == 0 or (i+1) == number_batches):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
             
-        return self.latent_loss, self.loss_joint
+        return None, self.loss_joint
 
 
     # TODO: test with bigger batch
