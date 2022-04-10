@@ -22,7 +22,7 @@ from models import pix2pix_model
 from models import networks
 import cv2
 import torch.multiprocessing
-from plot_train_losses import plot_losses
+from plot_train_losses import plot_losses, plot_supervision_loss
 
 # import gc
 # gc.collect()
@@ -62,7 +62,6 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 video_list = 'test_data/full_train_list_grid.txt'
 # video_list = "test_data/temp_list_5.txt"
 
-# test_video_list = 'test_data/test_list_grid.txt'
 test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
@@ -80,7 +79,12 @@ video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
-model = pix2pix_model.Pix2PixModel(opt, True)
+if opt.train_from_scratch:
+    print("Training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, True)
+else:
+    print("Not training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, False)
 # model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
 
 torch.backends.cudnn.enabled = True
@@ -117,12 +121,12 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        latent_loss, supervision_loss = model.depth_train(i, img, target, num_batches, k)
-        # latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        supervision_loss = model.depth_train(i, img, target, num_batches, k)
+        # supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         if (i%10000 == 0):
             counter += 1
-            latent_loss_accum += latent_loss
+            # latent_loss_accum += latent_loss
             supervision_loss_accum += supervision_loss
         #######
         # examining masks vs. depth values:
@@ -130,7 +134,7 @@ for epoch in range(max_epochs):
         # cv2.imwrite('test_data/scratch_debug_masks/mask0.3.png', target['gt_mask'][0].detach().numpy()*255)
         # cv2.imwrite('test_data/scratch_debug_masks/depth0.3.png', target['depth_gt'][0].detach().numpy()*255)
         # exit()
-    latent_loss_list.append(latent_loss_accum/i)
+    # latent_loss_list.append(latent_loss_accum/i)
     supervision_loss_list.append(supervision_loss_accum/i)
 
     #TODO
@@ -140,7 +144,7 @@ for epoch in range(max_epochs):
 
 if opt.plot_losses:
     #plot losses
-    plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
+    plot_supervision_loss(supervision_loss_list, opt.save_weights)
 
 print("Finished training. ")
 # model.switch_to_eval()

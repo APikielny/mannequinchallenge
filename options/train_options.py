@@ -88,4 +88,8 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--train_from_scratch', action='store_true',
                                 help='if training from scratch, do not load an old model weights')
                                 
+
+        self.parser.add_argument('--use_1x1_conv', action="store_true",
+                                help="use 1x1 convolutions to achieve rotational equivariance")
+
         self.isTrain = True
