@@ -87,10 +87,11 @@ class Channels1(nn.Module):
         self.list.append(
             nn.Sequential(
                 #nn.AvgPool2d(2),
-                # DownSample2d(),
+                DownSample2d().cuda(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                UpSample2d().cuda()
                 # Old Upsampling Filter
                 # nn.UpsamplingBilinear2d(scale_factor=2)
             )
@@ -104,9 +105,7 @@ class Channels1(nn.Module):
             layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        return self.list[0](x)+self.list[1](x)
 
 
 class Channels2(nn.Module):
@@ -122,12 +121,13 @@ class Channels2(nn.Module):
         self.list.append(
             nn.Sequential(
                 #nn.AvgPool2d(2),
-                # DownSample2d(),
+                DownSample2d().cuda(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 Channels1(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
+                UpSample2d().cuda()
                 # Old Upsampling Filter
                 # nn.UpsamplingBilinear2d(scale_factor=2)
             )
@@ -137,9 +137,7 @@ class Channels2(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        return self.list[0](x)+self.list[1](x)
 
 
 class Channels3(nn.Module):
@@ -149,12 +147,13 @@ class Channels3(nn.Module):
         self.list.append(
             nn.Sequential(
                 #nn.AvgPool2d(2),
-                # DownSample2d(),
+                DownSample2d().cuda(),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 Channels2(),
                 inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                 inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                UpSample2d().cuda()
                 # Old Upsampling Filter
                 # nn.UpsamplingBilinear2d(scale_factor=2)
             )
@@ -170,9 +169,7 @@ class Channels3(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        return self.list[0](x)+self.list[1](x)
 
 
 class Channels4(nn.Module):
@@ -182,7 +179,7 @@ class Channels4(nn.Module):
         self.list.append(
             nn.Sequential(
                 #nn.AvgPool2d(2),
-                # DownSample2d(),
+                DownSample2d().cuda(),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                 Channels3(),
@@ -191,6 +188,7 @@ class Channels4(nn.Module):
                 # TODO: state_dict error if UpSample2d is here
                 # Old Upsampling filter
                 # nn.UpsamplingBilinear2d(scale_factor=2)
+                UpSample2d().cuda()
             )
         )  # BB3BA
         self.list.append(
@@ -203,9 +201,7 @@ class Channels4(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        return self.list[0](x)+self.list[1](x)
 
 
         # return self.list[0](x)+self.list[1](x)
