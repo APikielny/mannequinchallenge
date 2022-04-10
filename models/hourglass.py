@@ -28,6 +28,11 @@ from visualize import visualize_layer, visualize, view_all_activation_maps
 
 class inception(nn.Module):
     def __init__(self, input_size, config):
+        # Sample input: 128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]
+        # 128 - Number of input channels
+        # [32] - Number of layers for base 1*1 conv layer
+        # [3, 32, 32] - kernel size = 3, out_a = 32, out_b = 3
+
         self.config = config
         super(inception, self).__init__()
         self.convs = nn.ModuleList()
@@ -74,27 +79,43 @@ def hook_fn(m, i, o):
     visualisation_feature_map[m] = o
 
 class Channels1(nn.Module):
-    def __init__(self):
+    def __init__(self, use_1x1_conv):
         super(Channels1, self).__init__()
 
         self.list = nn.ModuleList()
-        self.list.append(
-            nn.Sequential(
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])
-            )
-        )  # EE
-        self.list.append(
-            nn.Sequential(
-                #nn.AvgPool2d(2),
-                # DownSample2d(),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                # Old Upsampling Filter
-                # nn.UpsamplingBilinear2d(scale_factor=2)
-            )
-        )  # EEE
+
+        if use_1x1_conv:
+            self.list.append(
+                nn.Sequential(
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]])
+                )
+            ) 
+            self.list.append(
+                nn.Sequential(
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                )
+            ) 
+        else:
+            self.list.append(
+                nn.Sequential(
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])
+                )
+            )  # EE
+            self.list.append(
+                nn.Sequential(
+                    #nn.AvgPool2d(2),
+                    # DownSample2d(),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    # Old Upsampling Filter
+                    # nn.UpsamplingBilinear2d(scale_factor=2)
+                )
+            )  # EEE
 
         # print("self.list size", len(self.list))
         # print("self.list", self.list)
@@ -108,30 +129,47 @@ class Channels1(nn.Module):
         downsample = DownSample2d().cuda()
         return self.list[0](x)+upsample(self.list[1](downsample(x)))
 
-
 class Channels2(nn.Module):
-    def __init__(self):
+    def __init__(self, use_1x1_conv):
         super(Channels2, self).__init__()
         self.list = nn.ModuleList()
-        self.list.append(
-            nn.Sequential(
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]])
+
+        if use_1x1_conv:
+            self.list.append(
+                nn.Sequential(
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 128, 128], [1, 128, 128], [1, 128, 128]])
+                )
+            )  
+            self.list.append(
+                nn.Sequential(
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    Channels1(use_1x1_conv),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[128], [1, 128, 128], [1, 128, 128], [1, 128, 128]]),
+                )
             )
-        )  # EF
-        self.list.append(
-            nn.Sequential(
-                #nn.AvgPool2d(2),
-                # DownSample2d(),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                Channels1(),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
-                # Old Upsampling Filter
-                # nn.UpsamplingBilinear2d(scale_factor=2)
-            )
-        )  # EE1EF
+        else:
+            self.list.append(
+                nn.Sequential(
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]])
+                )
+            )  # EF
+            self.list.append(
+                nn.Sequential(
+                    #nn.AvgPool2d(2),
+                    # DownSample2d(),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    Channels1(use_1x1_conv),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
+                    # Old Upsampling Filter
+                    # nn.UpsamplingBilinear2d(scale_factor=2)
+                )
+            )  # EE1EF
 
         # for layer in self.list:
         #     layer.register_forward_hook(hook_fn)
@@ -141,30 +179,47 @@ class Channels2(nn.Module):
         downsample = DownSample2d().cuda()
         return self.list[0](x)+upsample(self.list[1](downsample(x)))
 
-
 class Channels3(nn.Module):
-    def __init__(self):
+    def __init__(self, use_1x1_conv):
         super(Channels3, self).__init__()
         self.list = nn.ModuleList()
-        self.list.append(
-            nn.Sequential(
-                #nn.AvgPool2d(2),
-                # DownSample2d(),
-                inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                Channels2(),
-                inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                # Old Upsampling Filter
-                # nn.UpsamplingBilinear2d(scale_factor=2)
+        
+        if use_1x1_conv:
+            self.list.append(
+                nn.Sequential(
+                    inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
+                    inception(256, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    Channels2(use_1x1_conv),
+                    inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
+                    inception(512, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
+                )
+            ) 
+            self.list.append(
+                nn.Sequential(
+                    inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
+                    inception(256, [[64], [1, 128, 64], [1, 128, 64], [1, 128, 64]])
+                )
             )
-        )  # BD2EG
-        self.list.append(
-            nn.Sequential(
-                inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                inception(128, [[32], [3, 64, 32], [7, 64, 32], [11, 64, 32]])
-            )
-        )  # BC
+        else:
+            self.list.append(
+                nn.Sequential(
+                    #nn.AvgPool2d(2),
+                    # DownSample2d(),
+                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                    inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    Channels2(use_1x1_conv),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                    # Old Upsampling Filter
+                    # nn.UpsamplingBilinear2d(scale_factor=2)
+                )
+            )  # BD2EG
+            self.list.append(
+                nn.Sequential(
+                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                    inception(128, [[32], [3, 64, 32], [7, 64, 32], [11, 64, 32]])
+                )
+            )  # BC
 
         # for layer in self.list:
         #     layer.register_forward_hook(hook_fn)
@@ -174,30 +229,46 @@ class Channels3(nn.Module):
         downsample = DownSample2d().cuda()
         return upsample(self.list[0](downsample(x)))+self.list[1](x)
 
-
 class Channels4(nn.Module):
-    def __init__(self):
+    def __init__(self, use_1x1_conv):
         super(Channels4, self).__init__()
         self.list = nn.ModuleList()
-        self.list.append(
+        
+        if use_1x1_conv:
+            self.list.append(
             nn.Sequential(
-                #nn.AvgPool2d(2),
-                # DownSample2d(),
-                inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                Channels3(),
-                inception(128, [[32], [3, 64, 32], [5, 64, 32], [7, 64, 32]]),
-                inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]]),
-                # TODO: state_dict error if UpSample2d is here
-                # Old Upsampling filter
-                # nn.UpsamplingBilinear2d(scale_factor=2)
+                inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
+                inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
+                Channels3(use_1x1_conv),
+                inception(256, [[64], [1, 128, 64], [1, 128, 64], [1, 128, 64]]),
+                inception(256, [[32], [1, 64, 32], [1, 64, 32], [1, 64, 32]]),
             )
-        )  # BB3BA
-        self.list.append(
-            nn.Sequential(
-                inception(128, [[16], [3, 64, 16], [7, 64, 16], [11, 64, 16]])
-            )
-        )  # A
+            )  
+            self.list.append(
+                nn.Sequential(
+                    inception(256, [[32], [1, 128, 32], [1, 128, 32], [1, 128, 32]])
+                )
+            )  
+        else: 
+            self.list.append(
+                nn.Sequential(
+                    #nn.AvgPool2d(2),
+                    # DownSample2d(),
+                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+                    Channels3(use_1x1_conv),
+                    inception(128, [[32], [3, 64, 32], [5, 64, 32], [7, 64, 32]]),
+                    inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]]),
+                    # TODO: state_dict error if UpSample2d is here
+                    # Old Upsampling filter
+                    # nn.UpsamplingBilinear2d(scale_factor=2)
+                )
+            )  # BB3BA
+            self.list.append(
+                nn.Sequential(
+                    inception(128, [[16], [3, 64, 16], [7, 64, 16], [11, 64, 16]])
+                )
+            )  # A
 
         # for layer in self.list:
         #     layer.register_forward_hook(hook_fn)
@@ -376,19 +447,37 @@ class HourglassModel(nn.Module):
         mapping_size = 128
         self.fourier_feature_transform = GaussianFourierFeatureTransform(5)
 
-        self.seq = nn.Sequential(
-            # nn.Conv2d(num_input, 128, 7, padding=3),
-            # nn.Conv2d(5, 128, 7, padding = 3), # For r,g,b,x,y input
-            nn.Conv2d(mapping_size * 2, 128, 7, padding = 3), 
-            nn.BatchNorm2d(128),
-            nn.ReLU(True),
-            Channels4(),
-        )
+        # TODO: Switching to 1x1 Convolutions Works Currently, Just Testing
+        # - I double feature maps for inception base 1x1 layer, which maybe isn't needed?
+        # - Using inception with only 1x1 convolution may be unnecessary?
+        # - Parameters overall decreased so can maybe switch mapping size to 256
+        # TODO: (Maybe) Switch from doubling feature maps to something smarter especially for >3 kernel size 
+        if use_1x1_conv:
+            self.seq = nn.Sequential(
+                nn.Conv2d(mapping_size * 2, 256, 1, padding = 0), 
+                nn.BatchNorm2d(256),
+                nn.ReLU(True),
+                Channels4(use_1x1_conv), 
+            )
 
-        uncertainty_layer = [
-            nn.Conv2d(64, 1, 3, padding=1), torch.nn.Sigmoid()]
-        self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
-        self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
+            uncertainty_layer = [
+                nn.Conv2d(128, 1, 1, padding=0), torch.nn.Sigmoid()]
+            self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
+            self.pred_layer = nn.Conv2d(128, 1, 1, padding=0)
+        else:
+            self.seq = nn.Sequential(
+                # nn.Conv2d(num_input, 128, 7, padding=3),
+                # nn.Conv2d(5, 128, 7, padding = 3), # For r,g,b,x,y input
+                nn.Conv2d(mapping_size * 2, 128, 7, padding = 3), 
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                Channels4(use_1x1_conv),
+            )
+
+            uncertainty_layer = [
+                nn.Conv2d(64, 1, 3, padding=1), torch.nn.Sigmoid()]
+            self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
+            self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
     def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
 
