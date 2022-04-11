@@ -300,11 +300,6 @@ class SupervisionImageFolder(data.Dataset):
         self.resized_height = 288
         self.resized_width = 512
 
-        x_coords = np.linspace(0, 1, self.resized_width, endpoint=False)
-        y_coords = np.linspace(0, 1, self.resized_height, endpoint=False)
-        xy_grid = np.stack(np.meshgrid(x_coords, y_coords), -1)
-        self.xy_grid = torch.tensor(xy_grid).permute(2, 0, 1).float().contiguous()
-
         self.use_pp = True
 
     def load_imgs(self, img_path):
@@ -340,8 +335,6 @@ class SupervisionImageFolder(data.Dataset):
         final_img = torch.from_numpy(np.ascontiguousarray(
             img).transpose(2, 0, 1)).contiguous().float()
         # (3, height, width)
-        final_img = torch.cat((final_img, self.xy_grid), axis = 0)
-        # (5, height, width)
 
         targets_1['img_1_path'] = img_path
         targets_1['depth_gt'] = torch.from_numpy(np.ascontiguousarray(

@@ -73,18 +73,18 @@ class SupervisionDataLoader():
 
  # NOTE: For Supervision + Latent Constraint Loss
 class SupervisionLatentDataLoader():
-     def __init__(self, list_path, _batch_size):
-         dataset = image_folder.SupervisionLatentImageFolder(list_path=list_path)
-         self.data_loader = torch.utils.data.DataLoader(dataset,
-                                                        batch_size=_batch_size,
-                                                        shuffle=True,
-                                                        num_workers=int(1))
-         self.dataset = dataset
+    def __init__(self, list_path, _batch_size):
+        dataset = image_folder.SupervisionLatentImageFolder(list_path=list_path)
+        self.data_loader = torch.utils.data.DataLoader(dataset,
+                                                    batch_size=_batch_size,
+                                                    shuffle=True,
+                                                    num_workers=int(1))
+        self.dataset = dataset
 
-     def load_data(self):
+    def load_data(self):
          return self.data_loader
 
-     def name(self):
+    def name(self):
          return 'SupervisionLatentDataLoader'
         
     def __len__(self):
