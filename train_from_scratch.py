@@ -115,7 +115,7 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        # model.depth_train(i, img, target, num_batches)
+        # model.depth_train(i, img, target, num_batches, k)
         latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         if (i%10000 == 0):
@@ -131,7 +131,7 @@ for epoch in range(max_epochs):
     latent_loss_list.append(latent_loss_accum/i)
     supervision_loss_list.append(supervision_loss_accum/i)
 
-    #TODO
+ 
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
         save_interim_results_func(epoch)
