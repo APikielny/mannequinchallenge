@@ -59,14 +59,14 @@ def save_interim_results_func(epoch_num):
 # video_list = 'test_data/supervision_list.txt'
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-video_list = 'test_data/full_train_list_grid.txt'
+# video_list = 'test_data/full_train_list_grid.txt'
 # video_list = "test_data/temp_list_5.txt"
 
-test_video_list = 'test_data/test_list_grid_adam_translate.txt'
+# test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
-# video_list = 'test_data/small_train_list_grid.txt'
-# test_video_list = 'test_data/small_test_list_grid.txt'
+video_list = 'test_data/small_train_list_grid.txt'
+test_video_list = 'test_data/small_test_list_grid.txt'
 
 
 eval_num_threads = 2

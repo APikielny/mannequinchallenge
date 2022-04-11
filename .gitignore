@@ -8,3 +8,4 @@ test_data/viz_predictions*
 latent_images/
 .DS_Store
 *.DS_Store
+training_loss_graphs/

@@ -53,7 +53,7 @@ def check_model_equality(weights_a, weights_b):
     return True
 
 # compare differences between frames and plot through time. Can do L2 and variance plotting. 
-def L2_frame_consistency(folder, cut_in_half=True, plot_distances=True, plot_variances=True): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
+def L2_frame_consistency(folder, cut_in_half=True, plot_distances=True, plot_variances=False): # cut in half: if the frame has the depth map and original image, only use depth part of jpg
     img_file_names = []
     depth_list = []
     img_list = []

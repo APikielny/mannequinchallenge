@@ -806,7 +806,7 @@ class Pix2PixModel(base_model.BaseModel):
         stack_inputs = input_imgs
 
         prediction_d, pred_confidence = self.netG.forward(
-            stack_inputs, targets, visualize)
+            stack_inputs, targets, visualize, False, self.weights)
         pred_log_d = prediction_d.squeeze(1)
         pred_d = torch.exp(pred_log_d)
         # pred_d = pred_log_d
