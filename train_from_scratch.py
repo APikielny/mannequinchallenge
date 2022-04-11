@@ -65,6 +65,12 @@ video_list = 'test_data/full_train_list_grid.txt'
 # test_video_list = 'test_data/test_list_grid.txt'
 test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
+#overfit:
+# video_list = 'test_data/small_train_list_grid.txt'
+# test_video_list = 'test_data/small_test_list_grid.txt'
+
+
+
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
 # video_dataset = video_data_loader.load_data()
@@ -73,7 +79,7 @@ video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
-model = pix2pix_model.Pix2PixModel(opt, True)
+model = pix2pix_model.Pix2PixModel(opt)#, True) TODO CHANGE BACK TO TRUE FOR TRAIN FROM SCRATCH
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
