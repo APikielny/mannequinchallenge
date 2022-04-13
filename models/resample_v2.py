@@ -29,7 +29,8 @@ class LowPassWindowedSinc(nn.Module):
         self.half_size = kernel_size // 2
         self.filter = kernel
 
-        x = x.view(-1, 1, shape[-2], shape[-1]) #this reshape is necessary for convolution to work
+        # x = x.view(-1, 1, shape[-2], shape[-1]) #this reshape is necessary for convolution to work
+        x = x.reshape(-1, 1, shape[-2], shape[-1]) #this reshape is necessary for convolution to work #(updated for fourier features)
         
         if self.pad:
             x = F.pad(

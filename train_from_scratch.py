@@ -22,7 +22,7 @@ from models import pix2pix_model
 from models import networks
 import cv2
 import torch.multiprocessing
-from plot_train_losses import plot_losses
+from plot_train_losses import plot_losses, plot_supervision_loss
 
 # import gc
 # gc.collect()
@@ -65,12 +65,11 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/full_train_list_grid.txt'
 video_list = "test_data/temp_list_5.txt"
 
-# test_video_list = 'test_data/test_list_grid.txt'
-test_video_list = 'test_data/test_list_grid_adam_translate.txt'
+# test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
-# video_list = 'test_data/small_train_list_grid.txt'
-# test_video_list = 'test_data/small_test_list_grid.txt'
+video_list = 'test_data/small_train_list_grid.txt'
+test_video_list = 'test_data/small_test_list_grid.txt'
 
 
 eval_num_threads = 2
@@ -83,7 +82,12 @@ video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
       len(video_data_loader) * BATCH_SIZE)
 
-model = pix2pix_model.Pix2PixModel(opt, True)
+if opt.train_from_scratch:
+    print("Training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, True)
+else:
+    print("Not training from scratch!")
+    model = pix2pix_model.Pix2PixModel(opt, False)
 # model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
 
 torch.backends.cudnn.enabled = True
@@ -120,8 +124,8 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        latent_loss, supervision_loss = model.depth_train(i, img, target, num_batches, k)
-        # latent_loss, supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        supervision_loss = model.depth_train(i, img, target, num_batches, k)
+        # supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         # if (i%10000 == 0):
         #     counter += 1

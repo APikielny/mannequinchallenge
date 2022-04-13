@@ -59,7 +59,7 @@ def view_all_activation_maps(visualisation_feature_map):
     for i in range(len(feature_map_list)):
         print(feature_map_list[i].shape)
 
-def visualize(visualisation_feature_map, input_, videoType, frameName):
+def visualize(visualisation_feature_map, input_, videoType, frameName, model_weights_name):
     #options
     visualize_model_arch = False
     view_feature_maps = True
@@ -110,7 +110,7 @@ def visualize(visualisation_feature_map, input_, videoType, frameName):
             img0 = cv2.resize(img0, (64 * scaleFactor, 36 * scaleFactor))
             img1 = cv2.resize(img1, (64 * scaleFactor, 36 * scaleFactor))
 
-            folder_path = os.path.join(os.getcwd(), "latent_images", videoType)
+            folder_path = os.path.join(os.getcwd(), "latent_images/" + model_weights_name, videoType)
             # create directory if it does not exist
             if(not os.path.exists(folder_path)):
                 os.makedirs(folder_path)
