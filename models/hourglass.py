@@ -449,8 +449,9 @@ class HourglassModel(nn.Module):
 
         # TODO: Switching to 1x1 Convolutions Works Currently, Just Testing
         # - I double feature maps for inception base 1x1 layer, which maybe isn't needed?
-        # - Using inception with only 1x1 convolution may be unnecessary?
+        # - Using inception with only 1x1 convolution may be unnecessary/weird? Research more about inception purpose
         # - Parameters overall decreased so can maybe switch mapping size to 256
+        # Some more overfitting + learning rate type tests, feels weird to compare because parameter count is smaller by factor 2x
         # TODO: (Maybe) Switch from doubling feature maps to something smarter especially for >3 kernel size 
         if use_1x1_conv:
             self.seq = nn.Sequential(
