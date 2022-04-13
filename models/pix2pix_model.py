@@ -713,7 +713,8 @@ class Pix2PixModel(base_model.BaseModel):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
             
-        return self.loss_joint
+        return
+        # return self.loss_joint
 
 
     # TODO: test with bigger batch

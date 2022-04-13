@@ -59,14 +59,14 @@ def save_interim_results_func(epoch_num):
 # video_list = 'test_data/supervision_list.txt'
 torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
-# video_list = 'test_data/full_train_list_grid.txt'
+video_list = 'test_data/full_train_list_grid.txt'
 # video_list = "test_data/temp_list_5.txt"
 
-# test_video_list = 'test_data/test_list_grid_adam_translate.txt'
+test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
-video_list = 'test_data/small_train_list_grid.txt'
-test_video_list = 'test_data/small_test_list_grid.txt'
+# video_list = 'test_data/small_train_list_grid.txt'
+# test_video_list = 'test_data/small_test_list_grid.txt'
 
 
 eval_num_threads = 2
@@ -121,13 +121,13 @@ for epoch in range(max_epochs):
         img, target = data
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
-        supervision_loss = model.depth_train(i, img, target, num_batches, k)
+        model.depth_train(i, img, target, num_batches, k)
         # supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
-        if (i%10000 == 0):
-            counter += 1
-            # latent_loss_accum += latent_loss
-            supervision_loss_accum += supervision_loss
+        # if (i%10000 == 0):
+        #     counter += 1
+        #     # latent_loss_accum += latent_loss
+        #     supervision_loss_accum += supervision_loss
         #######
         # examining masks vs. depth values:
         #######
@@ -142,9 +142,9 @@ for epoch in range(max_epochs):
     if save_interim_results:
         save_interim_results_func(epoch)
 
-if opt.plot_losses:
+# if opt.plot_losses:
     #plot losses
-    plot_supervision_loss(supervision_loss_list, opt.save_weights)
+    # plot_supervision_loss(supervision_loss_list, opt.save_weights)
 
 print("Finished training. ")
 # model.switch_to_eval()
