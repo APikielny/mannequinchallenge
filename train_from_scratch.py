@@ -129,11 +129,7 @@ for epoch in range(max_epochs):
         
         # if (i%10000 == 0):
         #     counter += 1
-<<<<<<< HEAD
-        #     # latent_loss_accum += latent_loss
-=======
         #     latent_loss_accum += latent_loss
->>>>>>> 87c66d6ad723f3e1808a9178b54a2fd9e4d207c3
         #     supervision_loss_accum += supervision_loss
         #######
         # examining masks vs. depth values:
@@ -150,13 +146,8 @@ for epoch in range(max_epochs):
         save_interim_results_func(epoch)
 
 # if opt.plot_losses:
-<<<<<<< HEAD
     #plot losses
     # plot_supervision_loss(supervision_loss_list, opt.save_weights)
-=======
-#     #plot losses
-#     plot_losses(latent_loss_list, supervision_loss_list, opt.save_weights, opt.latent_weight)
->>>>>>> 87c66d6ad723f3e1808a9178b54a2fd9e4d207c3
 
 print("Finished training. ")
 # model.switch_to_eval()
