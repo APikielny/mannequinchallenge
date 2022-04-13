@@ -89,7 +89,7 @@ class Pix2PixModel(base_model.BaseModel):
                 '======================================  DIW NETWORK TRAIN FROM %s======================='
                 % self.mode)
 
-            new_model = hourglass.HourglassModel(self.num_input, opt.use_1x1_conv)
+            new_model = hourglass.HourglassModel(self.num_input, opt.use_1x1_conv, _isTrain)
 
             print(
                 '===================Loading Pretrained Model OURS ==================================='
@@ -806,8 +806,10 @@ class Pix2PixModel(base_model.BaseModel):
 
         stack_inputs = input_imgs
 
+        # self.netG.forward has weights as the last input 
+        # I removed it idk if was leftover from something else?
         prediction_d, pred_confidence = self.netG.forward(
-            stack_inputs, targets, visualize, False, self.weights)
+            stack_inputs, targets, visualize)
         pred_log_d = prediction_d.squeeze(1)
         pred_d = torch.exp(pred_log_d)
         # pred_d = pred_log_d
