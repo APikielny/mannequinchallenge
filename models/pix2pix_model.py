@@ -774,7 +774,8 @@ class Pix2PixModel(base_model.BaseModel):
             self.optimizer_G.step()
             self.optimizer_G.zero_grad()
         
-        return self.latent_loss, self.loss_joint
+        return
+        #return self.latent_loss, self.loss_joint
 
 
     def depth_and_latent_train(self, input_list, targets_list):
