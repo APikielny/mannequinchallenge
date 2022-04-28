@@ -79,7 +79,7 @@ def hook_fn(m, i, o):
     visualisation_feature_map[m] = o
 
 class Channels1(nn.Module):
-    def __init__(self, use_1x1_conv):
+    def __init__(self, use_1x1_conv, anti_alias_upsample=False, anti_alias_downsample=False):
         super(Channels1, self).__init__()
 
         self.list = nn.ModuleList()
@@ -105,16 +105,22 @@ class Channels1(nn.Module):
                     inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])
                 )
             )  # EE
+
+            layers = [inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]])]
+            if anti_alias_downsample:
+                layers.insert(0, DownSample2d().cuda())
+            else:
+                layers.insert(0, nn.AvgPool2d(2))
+
+            if anti_alias_upsample:
+                layers.append(UpSample2d(ratio=2).cuda())
+            else:
+                layers.append(nn.UpsamplingBilinear2d(scale_factor=2))
+
             self.list.append(
-                nn.Sequential(
-                    #nn.AvgPool2d(2),
-                    # DownSample2d(),
-                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    # Old Upsampling Filter
-                    # nn.UpsamplingBilinear2d(scale_factor=2)
-                )
+                nn.Sequential(*layers)
             )  # EEE
 
         # print("self.list size", len(self.list))
@@ -125,12 +131,14 @@ class Channels1(nn.Module):
             layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        # upsample = UpSample2d(ratio=2).cuda()
+        # downsample = DownSample2d().cuda()
+        return self.list[0](x)+self.list[1](x)
+        # return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        # return self.list[0](x)+self.list[1](downsample(x))
 
 class Channels2(nn.Module):
-    def __init__(self, use_1x1_conv):
+    def __init__(self, use_1x1_conv, anti_alias_upsample=False, anti_alias_downsample=False):
         super(Channels2, self).__init__()
         self.list = nn.ModuleList()
 
@@ -145,7 +153,7 @@ class Channels2(nn.Module):
                 nn.Sequential(
                     inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
                     inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
-                    Channels1(use_1x1_conv),
+                    Channels1(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                     inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
                     inception(512, [[128], [1, 128, 128], [1, 128, 128], [1, 128, 128]]),
                 )
@@ -156,31 +164,53 @@ class Channels2(nn.Module):
                     inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                     inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]])
                 )
-            )  # EF
-            self.list.append(
-                nn.Sequential(
-                    #nn.AvgPool2d(2),
-                    # DownSample2d(),
+            ) 
+            # EF
+            # self.list.append(
+            #     nn.Sequential(
+            #         #nn.AvgPool2d(2),
+            #         # DownSample2d(),
+            #         # inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+            #         # inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+            #         # Channels1(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
+            #         # inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+            #         # inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
+            #         # Old Upsampling Filter
+            #         # nn.UpsamplingBilinear2d(scale_factor=2)
+            #     )
+            # )  # EE1EF
+
+            layers = [inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
                     inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+                    Channels1(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                     inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    Channels1(use_1x1_conv),
-                    inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]]),
-                    # Old Upsampling Filter
-                    # nn.UpsamplingBilinear2d(scale_factor=2)
-                )
-            )  # EE1EF
+                    inception(256, [[64], [3, 64, 64], [7, 64, 64], [11, 64, 64]])]
+
+            if anti_alias_downsample:
+                layers.insert(0, DownSample2d().cuda())
+            else:
+                layers.insert(0, nn.AvgPool2d(2))
+
+            if anti_alias_upsample:
+                layers.append(UpSample2d(ratio=2).cuda())
+            else:
+                layers.append(nn.UpsamplingBilinear2d(scale_factor=2))
+
+            self.list.append(nn.Sequential(*layers))
 
         # for layer in self.list:
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        # upsample = UpSample2d(ratio=2).cuda()
+        # downsample = DownSample2d().cuda()
+        # return self.list[0](x)+self.list[1](downsample(x))
+        # return self.list[0](x)+upsample(self.list[1](downsample(x)))
+        return self.list[0](x)+self.list[1](x)
+
 
 class Channels3(nn.Module):
-    def __init__(self, use_1x1_conv):
+    def __init__(self, use_1x1_conv, anti_alias_upsample=False, anti_alias_downsample=False):
         super(Channels3, self).__init__()
         self.list = nn.ModuleList()
         
@@ -189,7 +219,7 @@ class Channels3(nn.Module):
                 nn.Sequential(
                     inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
                     inception(256, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
-                    Channels2(use_1x1_conv),
+                    Channels2(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                     inception(512, [[128], [1, 64, 128], [1, 64, 128], [1, 64, 128]]),
                     inception(512, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
                 )
@@ -201,19 +231,37 @@ class Channels3(nn.Module):
                 )
             )
         else:
-            self.list.append(
-                nn.Sequential(
-                    #nn.AvgPool2d(2),
-                    # DownSample2d(),
-                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+            # self.list.append(
+            #     nn.Sequential(
+            #         #nn.AvgPool2d(2),
+            #         # DownSample2d(),
+            #         inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+            #         inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+            #         Channels2(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
+            #         inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
+            #         inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+            #         # Old Upsampling Filter
+            #         # nn.UpsamplingBilinear2d(scale_factor=2)
+            #     )
+            # )  # BD2EG
+
+            layers = [inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                     inception(128, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    Channels2(use_1x1_conv),
+                    Channels2(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                     inception(256, [[64], [3, 32, 64], [5, 32, 64], [7, 32, 64]]),
-                    inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                    # Old Upsampling Filter
-                    # nn.UpsamplingBilinear2d(scale_factor=2)
-                )
-            )  # BD2EG
+                    inception(256, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),]
+
+            if anti_alias_downsample:
+                layers.insert(0, DownSample2d().cuda())
+            else:
+                layers.insert(0, nn.AvgPool2d(2))
+
+            if anti_alias_upsample:
+                layers.append(UpSample2d(ratio=2).cuda())
+            else:
+                layers.append(nn.UpsamplingBilinear2d(scale_factor=2))
+            self.list.append(nn.Sequential(*layers))
+
             self.list.append(
                 nn.Sequential(
                     inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
@@ -225,12 +273,15 @@ class Channels3(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        # upsample = UpSample2d(ratio=2).cuda()
+        # downsample = DownSample2d().cuda()
+        return self.list[0](x)+self.list[1](x)
+        # return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        # return self.list[0](downsample(x))+self.list[1](x)
+
 
 class Channels4(nn.Module):
-    def __init__(self, use_1x1_conv):
+    def __init__(self, use_1x1_conv, anti_alias_upsample=False, anti_alias_downsample=False):
         super(Channels4, self).__init__()
         self.list = nn.ModuleList()
         
@@ -239,7 +290,7 @@ class Channels4(nn.Module):
             nn.Sequential(
                 inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
                 inception(256, [[64], [1, 64, 64], [1, 64, 64], [1, 64, 64]]),
-                Channels3(use_1x1_conv),
+                Channels3(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                 inception(256, [[64], [1, 128, 64], [1, 128, 64], [1, 128, 64]]),
                 inception(256, [[32], [1, 64, 32], [1, 64, 32], [1, 64, 32]]),
             )
@@ -250,20 +301,38 @@ class Channels4(nn.Module):
                 )
             )  
         else: 
-            self.list.append(
-                nn.Sequential(
-                    #nn.AvgPool2d(2),
-                    # DownSample2d(),
+            # self.list.append(
+            #     nn.Sequential(
+            #         #nn.AvgPool2d(2),
+            #         # DownSample2d(),
+            #         inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+            #         inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
+            #         Channels3(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
+            #         inception(128, [[32], [3, 64, 32], [5, 64, 32], [7, 64, 32]]),
+            #         inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]]),
+            #         # Old Upsampling filter
+            #         # nn.UpsamplingBilinear2d(scale_factor=2)
+            #     )
+            # )  # BB3BA
+
+            layers = [inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
                     inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                    inception(128, [[32], [3, 32, 32], [5, 32, 32], [7, 32, 32]]),
-                    Channels3(use_1x1_conv),
+                    Channels3(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
                     inception(128, [[32], [3, 64, 32], [5, 64, 32], [7, 64, 32]]),
-                    inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]]),
-                    # TODO: state_dict error if UpSample2d is here
-                    # Old Upsampling filter
-                    # nn.UpsamplingBilinear2d(scale_factor=2)
-                )
-            )  # BB3BA
+                    inception(128, [[16], [3, 32, 16], [7, 32, 16], [11, 32, 16]])]
+
+            if anti_alias_downsample:
+                layers.insert(0, DownSample2d().cuda())
+            else:
+                layers.insert(0, nn.AvgPool2d(2))
+
+            if anti_alias_upsample:
+                layers.append(UpSample2d(ratio=2).cuda())
+            else:
+                layers.append(nn.UpsamplingBilinear2d(scale_factor=2))
+            
+            self.list.append(nn.Sequential(*layers))
+
             self.list.append(
                 nn.Sequential(
                     inception(128, [[16], [3, 64, 16], [7, 64, 16], [11, 64, 16]])
@@ -274,9 +343,11 @@ class Channels4(nn.Module):
         #     layer.register_forward_hook(hook_fn)
 
     def forward(self, x):
-        upsample = UpSample2d(ratio=2).cuda()
-        downsample = DownSample2d().cuda()
-        return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        # upsample = UpSample2d(ratio=2).cuda()
+        # downsample = DownSample2d().cuda()
+        return self.list[0](x)+self.list[1](x)
+        # return upsample(self.list[0](downsample(x)))+self.list[1](x)
+        # return self.list[0](downsample(x))+self.list[1](x)
 
 
         # return self.list[0](x)+self.list[1](x)
@@ -325,12 +396,12 @@ class GaussianFourierFeatureTransform(torch.nn.Module):
         return torch.cat([torch.sin(x), torch.cos(x)], dim=1)
 
 class HourglassModel(nn.Module):
-    def __init__(self, num_input, use_1x1_conv, _isTrain):
+    def __init__(self, num_input, use_1x1_conv, scale, anti_alias_upsample, anti_alias_downsample, _isTrain):
         super(HourglassModel, self).__init__()
 
         # Hyperparameters for fourier features
         self.mapping_size = 128
-        self.scale = 6
+        self.scale = scale
         self.fourier_feature_transform = GaussianFourierFeatureTransform(5, self.mapping_size, self.scale)
 
         # TODO: Switching to 1x1 Convolutions Works Currently, Just Testing
@@ -344,7 +415,7 @@ class HourglassModel(nn.Module):
                 nn.Conv2d(self.mapping_size * 2, 256, 1, padding = 0), 
                 nn.BatchNorm2d(256),
                 nn.ReLU(True),
-                Channels4(use_1x1_conv), 
+                Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample), 
             )
 
             uncertainty_layer = [
@@ -355,10 +426,10 @@ class HourglassModel(nn.Module):
             self.seq = nn.Sequential(
                 # nn.Conv2d(num_input, 128, 7, padding=3),
                 # nn.Conv2d(5, 128, 7, padding = 3), # For r,g,b,x,y input
-                nn.Conv2d(mapping_size * 2, 128, 7, padding = 3), 
+                nn.Conv2d(self.mapping_size * 2, 128, 7, padding = 3), 
                 nn.BatchNorm2d(128),
                 nn.ReLU(True),
-                Channels4(use_1x1_conv),
+                Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
             )
 
             uncertainty_layer = [

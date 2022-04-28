@@ -91,5 +91,11 @@ class TrainOptions(BaseOptions):
 
         self.parser.add_argument('--use_1x1_conv', action="store_true",
                                 help="use 1x1 convolutions to achieve rotational equivariance")
+        self.parser.add_argument('--scale', type=float,
+                                help="scale/sampling frequency to use for Gaussian Fourier Features")
+        self.parser.add_argument('--anti_alias_upsample', action="store_true",
+                                help="use windowed sinc lowpass filter for upsampling")
+        self.parser.add_argument('--anti_alias_downsample', action="store_true",
+                                help="use windowed sinc lowpass filter for downsampling")
 
         self.isTrain = True
