@@ -1,84 +1,21 @@
-# Mannequin Challenge Code and Trained Models
+Bash Scripts:
+All bash scripts I wrote to run on grid should be stored in mannequinchallenge/grid_bash_scripts. Preivously, they were free-floating in /data/jhtlab/apikieln, so if something is breaking now it probably is a paths issue.
 
-This repository contains inference code for models trained on the Mannequin
-Challenge dataset introduced in the CVPR 2019 paper "[Learning the Depths of
-Moving People by Watching Frozen People](https://mannequin-depth.github.io/)."
+Some scripts (.sh) are accompanied by a plain text file that shows exactly how to run it. This isn't necessary, but it was helpful for me when switching betwee scripts. For example, for `test_mannequin_on_grid.sh`, run `cat test_grid_command` to see the command I use, and copy/paste that to trigger `test_mannequin_on_grid.sh` to run on grid. 
 
-This is not an officially supported Google product.
-
-## Setup
-
-The code is based on PyTorch. The code has been tested with PyTorch 1.1 and Python 3.6. 
-
-We recommend setting up a `virtualenv` environment for installing PyTorch and
-the other necessary Python packages. The [TensorFlow installation
-guide](https://www.tensorflow.org/install/pip) may be helpful (follow steps 1
-and 2) or follow the `virtualenv` documentation.
-
-Once your environment is set up and activated, install the necessary packages:
-
-```
-(pytorch)$ pip install torch torchvision scikit-image h5py
-```
-
-The model checkpoints are stored on Google Cloud and may be retrieved by running:
-
-```
-(pytorch)$ ./fetch_checkpoints.sh
-```
-
-## Single-View Inference
-
-Our test set for single-view inference is the [DAVIS
-2016](https://davischallenge.org/davis2016/code.html) dataset. Download and
-unzip it by running:
-
-```
-(pytorch)$ ./fetch_davis_data.sh
-```
-
-Then run the DAVIS inference script:
-
-```
-(pytorch)$ python test_davis_videos.py --input=single_view
-```
-
-Once the run completes, visualizations of the output should be
-available in `test_data/viz_predictions`.
-
-## Full Model Inference
-
-The full model described in the paper requires several additional inputs: the
-human segmentation mask, the depth-from-parallax buffer, and (optionally) a
-human keypoint buffer. We provide a preprocessed version of the [TUM
-RGBD](https://vision.in.tum.de/data/datasets/rgbd-dataset) dataset that includes
-these inputs. Download (~9GB) and unzip it using the script:
-
-```
-(pytorch)$ ./fetch_tum_data.sh
-```
-
-To reproduce the numbers in Table 2 of the paper, run:
-
-```
-(pytorch)$ python test_tum.py --input=single_view
-(pytorch)$ python test_tum.py --input=two_view
-(pytorch)$ python test_tum.py --input=two_view_k
-```
-
-Where `single_view` is the variant _I_ from the paper, `two_view` is the variant _IDCM_, and `two_view_k` is the variant _IDCMK_. The script prints running averages of the various error metrics as it runs. When the script completes, the final error metrics are shown.
+Here are the scripts:
+* `test_mannequin_on_grid.sh` and `test_grid_command`: run inference on a given model. Right now, the dataset can't be specified here and must be done manually (TODO I think I have this functionality in other inference functions though?)
+* `train_mannequin_on_grid.sh` and `train_grid_command`: train a model. Dataset must still be specified in train_from_scratch.py. (TODO name of python file is confusing because it doesn't always train from scratch.) Other options can be specified on command line, such as epochs, batch size, etc. See `mannequinchallenge/options/train_options.py` for full list of options. 
+* `L2_consistency_metric_script.sh` measure consistency of a model. This script doesn't require grid to use! You can simply call bash L2_... You can specify the data to use. However, this requires that data (output images) already be generated. Also, currently this only measures one video/set of frames at a time, but I think it would be better to measure it for a whole dataset and then take an average. 
+* `alias_free_L2_consistency_metric_script.sh` TODO I think this script is no longer necessary? 
 
 
-## Acknowledgements
-
-If you find the code or results useful, please cite the following paper:
-
-```
-@inproceedings{li2019learning,
-  title={Learning the Depths of Moving People by Watching Frozen People},
-  author={Li, Zhengqi and Dekel, Tali and Cole, Forrester and Tucker, Richard
-    and Snavely, Noah and Liu, Ce and Freeman, William T},
-  booktitle={Proc. Computer Vision and Pattern Recognition (CVPR)},
-  year={2019}
-}
-```
+Explanation of folders in /data/jhtlab/apikieln:
+* venv-mannequin is the virtual environment that needs to be activated before training or testing our code. It can be activated using
+`cd /data/jhtlab/apikieln
+source ./venv-mannequin/bin/activate`
+* vrlab_machine_backup is a backup of previous work we were doing on avd-vrlab3, which is a machine in the visual computing lab. I backed it up because the disk was failing. 
+* checkpoints contains saved models
+* alias-free-torch is someone else's repo implementing alias-free-gan
+* logs contains all logs from CS grid jobs. I have a document detailing the purpose of each job. In order for a job to output its log here, you must cd into logs before running the job
+* 
