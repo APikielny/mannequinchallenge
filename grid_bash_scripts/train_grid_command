@@ -1,0 +1,8 @@
+how to run on grid:
+cd /data/jhtlab/apikieln/logs
+qsub -cwd -l gpus=1 -l gmem=24 -m abes /data/jhtlab/apikieln/mannequinchallenge/grid_bash_scripts/train_mannequin_on_grid.sh
+
+The -cwd flag ensures that the script runs in this directory and ensures that output lands here.
+Also, for some reason without the gpus it seems like the venv doesn't activate? We need gpus regardless
+
+More info: https://cs.brown.edu/about/system/services/hpc/gridengine/ 

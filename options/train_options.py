@@ -95,6 +95,8 @@ class TrainOptions(BaseOptions):
                                 help='a test list to use for inference')
         self.parser.add_argument('--accuracy_dataset', type=str,
                                 help='the dataset being used')
+        self.parser.add_argument('--viz_folder', type=str,
+                                help='folder in viz predictions for saving data')
         self.parser.add_argument('--accuracy_id', type=str,
                                 help='the id being used')
         

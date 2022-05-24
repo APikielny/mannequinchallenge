@@ -121,7 +121,7 @@ def compute_scaled_error(pred_confidence, mask, pred_d, gt_d):
 
         # return scale_error, bias_error
         # return lst_sq_erro
-        return lst_sq_MSE
+        return lst_sq_MSE, m, b
 
 def compute_error_single_pair(gt_path, pred_path):
     pred_confidence = 1
@@ -134,17 +134,37 @@ def compute_error_single_pair(gt_path, pred_path):
     gt_depth_resize = resize_layer(gt_depth)
     cropped_pred_depth = pred_depth[:, :, 512:]
 
-    save_image(cropped_pred_depth/255, "accuracy_testing/pred_depth.jpg")
-    save_image(gt_depth_resize/255, "accuracy_testing/gt_depth.jpg")
+    # save_image(cropped_pred_depth/255, "accuracy_testing/pred_depth.jpg")
+    # save_image(gt_depth_resize/255, "accuracy_testing/gt_depth.jpg")
 
     # gt_mask = (gt_depth > 0.2 * 255).float()
     gt_mask = (gt_depth > 0.1 * 255).float()
     # gt_mask = (gt_depth > -1000 ).float()
     gt_mask = resize_layer(gt_mask)
 
-    save_image(gt_mask, "accuracy_testing/mask.jpg")
+    # save_image(gt_mask, "accuracy_testing/mask.jpg")
 
-    error = compute_scaled_error(pred_confidence, gt_mask, cropped_pred_depth, gt_depth_resize) #TODO what should pred confidence be?
+    error, m, b = compute_scaled_error(pred_confidence, gt_mask, cropped_pred_depth, gt_depth_resize) #TODO what should pred confidence be?
+
+    abs_diff = torch.abs((cropped_pred_depth * m + b) - gt_depth_resize)
+    masked_abs_diff = gt_mask * abs_diff
+
+    # print("eg path pred", pred_path)
+    # print("eg path gt", gt_path)
+
+    frame = pred_path.split("/")[-1]
+    difference_dir = os.path.join(os.path.dirname(pred_path), "absolute_accuracy_difference")
+    masked_difference_dir = os.path.join(os.path.dirname(pred_path), "absolute_accuracy_masked_difference")
+    if not os.path.exists(difference_dir):
+        os.makedirs(difference_dir)
+    if not os.path.exists(masked_difference_dir):
+        os.makedirs(masked_difference_dir)
+
+    masked_diff_path = masked_difference_dir+"/"+frame
+    diff_path = difference_dir+"/"+frame
+    save_image(abs_diff/255, diff_path)
+    save_image(masked_abs_diff/255, masked_diff_path)
+    # print("eg. path: ", abs_diff_path)
 
     return error
 

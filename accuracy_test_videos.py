@@ -43,8 +43,8 @@ print(
 print('TESTING ON VIDEO')
 
 model.switch_to_eval()
-save_path = 'test_data/viz_predictions/accuracy_testing/{}/{}/'.format(opt.accuracy_dataset, opt.accuracy_id)
-# print('save_path %s' % save_path)
+save_path = 'test_data/viz_predictions/{}/{}/{}/'.format(opt.viz_folder, opt.accuracy_dataset, opt.accuracy_id)
+print('save_path %s' % save_path)
 
 for i, data in enumerate(video_dataset):
     print(i)
