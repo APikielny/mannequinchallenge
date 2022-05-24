@@ -8,6 +8,8 @@ Here are the scripts:
 * `train_mannequin_on_grid.sh` and `train_grid_command`: train a model. Dataset must still be specified in train_from_scratch.py. (TODO name of python file is confusing because it doesn't always train from scratch.) Other options can be specified on command line, such as epochs, batch size, etc. See `mannequinchallenge/options/train_options.py` for full list of options. 
 * `L2_consistency_metric_script.sh` measure consistency of a model. This script doesn't require grid to use! You can simply call bash L2_... You can specify the data to use. However, this requires that data (output images) already be generated. Also, currently this only measures one video/set of frames at a time, but I think it would be better to measure it for a whole dataset and then take an average. 
 * `alias_free_L2_consistency_metric_script.sh` TODO I think this script is no longer necessary? 
+* `visualize_mannequin_on_grid.sh`: PCA latent visualization of a model. Make sure the proper flags are passed to test_davis_videos.py so that the right model architecture is used when loading! For example, specify if using anti-alias upsampling or downsampling, fourier features, etc.
+* `accuracy_metric_script.sh`: measure MSE accuracy compared to COLMAP as ground truth. Because I suspect anti-aliased models generalize better, I was trying with google depth as ground truth, which is in `accuracy_metric_script_google_gt.sh`, but this is still a WIP.
 
 
 Explanation of folders in /data/jhtlab/apikieln:
