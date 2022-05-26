@@ -1,14 +1,16 @@
 # Consistent Depth Estimation for Video
 
-## Quick Start
+## Very Quick Start
 
-A very quick guide to using this code: 
-1. If freshly cloning this repo, go to the Setup section first.
-2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run:
+A very quick guide to run inference:
 ```
-cd {path_to_mannequin}
+cd {path_to_this_repo}
 qsub -cwd -l gpus=1 -m abes grid_bash_scripts/test_mannequin_on_grid.sh
 ```
+
+## A Slightly Longer Start Guide
+1. If freshly cloning this repo, go to the Setup section first.
+2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run the command specified above. The model can be set in the bash script, and must exist in the checkpoints/ folder ahead of time. If this folder doesn't exist, you can use `./fetch_checkpoints.sh` or find them at `/data/jhtlab/apikieln/checkpoints`
 
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
