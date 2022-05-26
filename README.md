@@ -1,9 +1,33 @@
 # Consistent Depth Estimation for Video
 
+## Overview
+This repo contains implementation of Consistent Depth Estimation for Video code, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, combine) contain latent regularization, anti-alias sampling, and fourier features techniques towards this goal. 
+
+I have moved the original README to `README_Google.md`. This README now contains an effort to document our code. 
+
+## Important Files in mannequinchallenge
+
+This is non-exhaustive list of important python files and folders that we changed and will likely be changed further.
+
+* `accuracy_scripts/` contains the logic to evaluate MSE accuracy by doing least squares alignment with COLMAP depth. 
+* `grid_bash_scripts/` (discussed in Bash Scripts section), scripts to run stuff on grid, such as training, testing, etc. 
+* `loaders/`: loads data into model. We have different data loaders for different models. Discussed further in bash scripts section.
+* `models/`: very important. This is where the model architecture is defined
+    - We mainly modify pix2pixmodel and hourglass. Pix2pix is directly called by the training code (`train_from_scratch.py`). It contains the loss functions, optimizer, etc. The actual model architecture is defined in `hourglass.py`. Hourglass is where we change things like sampling and fourier features. 
+    - `resample_v2.py` contains our new sampling filters. The fourier features code is baked directly in in `hourglass.py`. 
+    - The upsample test files are not actually used by the model but are helpful for testing new sampling filters. 
+* `options/train_options.py`: flags to pass when training. Below the line #Added by Adam is stuff that was added this year. See bash scripts for examples of using these flags. 
+* `test_davis_videos.py` is the original code to run inference on the model. The "davis" was a reference to the original dataset but this can be modified. 
+* `train_from_scratch.py`: We use this for **all training** (it doesn't actually need to be from scratch, if you don't pass the train_from_scratch flag. Sorry this is confusing.). This file includes a data loader, train and test list, and a few other things that can be modified inline. Most things should be modified through flags. The end result of calling this file will be a .pth model saved to `checkpoints/`, along with intermediate inference results (these can be very helpful to see what the model is doing). 
+
+* `test_data/` is where all outputs go, except for the models themselves which go in `checkpoints/`. `test_data/` most importantly includes `viz_predictions`, where depth images are output. The structure varies, but generally is `viz_predictions -> dataset and/or specific ID -> model_name -> (sometimes) specific epoch of model`. 
+Scripts to generate video also output here, and there are also text files containing certain pieces of the datasets. 
+
+
 ## Bash Scripts:
 All bash scripts I wrote to run on grid should be stored in mannequinchallenge/grid_bash_scripts. Preivously, they were free-floating in /data/jhtlab/apikieln, so if something is breaking now it is probably a paths issue.
 
-Some scripts (.sh) are accompanied by a plain text file that shows exactly how to run it. This isn't necessary, but it was helpful for me when switching betwee scripts. For example, for `test_mannequin_on_grid.sh`, run `cat test_grid_command` to see the command I use, and copy/paste that to trigger `test_mannequin_on_grid.sh` to run on grid. The `-m abes` flag will email grid job status updates. I believe this just emails whoever submitted the job. I created a filter in my mail app to prevent these emails from flooding my inbox. 
+Some bash scripts are accompanied by a plain text file that shows exactly how to run it. This isn't necessary, but it was helpful for me when switching betwee scripts. For example, for `test_mannequin_on_grid.sh`, run `cat test_grid_command` to see the command I use, and copy/paste that to trigger `test_mannequin_on_grid.sh` to run on grid. The `-m abes` flag will email grid job status updates. I believe this just emails whoever submitted the job. I created a filter in my mail app to prevent these emails from flooding my inbox. 
 
 Here are the scripts:
 * `test_mannequin_on_grid.sh` and `test_grid_command`: run inference on a given model. Right now, the dataset can't be specified here and must be done manually (TODO I think I have this functionality in other inference functions though?)
@@ -16,7 +40,7 @@ Here are the scripts:
     - `convert_frames_to_video_split_screen.sh`: given input frames from multiple models, convert them to a single split screen video. You can also overlay text to label each model. The "3-way" version of this script splits between 3 videos. The "adam_translate" outputs had a different file structure so I ended up duplicating the script, but this isn't really necessary and should be abstracted. Also for these scripts, I would sometimes use a least squares alignment among models first to make them look the same. Right now, this has to be done manually using the accuracy_metric script: `accuracy_metric_google_gt.py --aligning_adam_translate_videos`. This is very hacky and it would be good to abstract this. Aligning them to COLMAP would also generally increase contrast which created better videos. `convert_frames_to_video.sh` works for a single frame set -> video.
     - `generate_result_videos.sh`: This runs inference on a model to generate frames, then converts them to video. This is different from the above which only do the conversion to video step. 
 
-
+Different configurations of the model require different amounts of memory. For some, the standard 11gb cards on grid are fine. For others, the 24gb card is necessary. Generally, if I run out of memory, I try the same job but decrease the batch size by a factor of 2, or try using the 24gb card if I wasn't already. We also have different data loaders. The Latent data loader loads in pairs of images (to constrain them), so it need more memory than loading in single images. The data loader can be changed in `train_from_scratch.py`. See `loaders/aligned_data_loader.py` for more info. 
 
 ## Explanation of folders in /data/jhtlab/apikieln:
 * `venv-mannequin` is the virtual environment that needs to be activated before training or testing our code. It can be activated using
@@ -27,6 +51,14 @@ source ./venv-mannequin/bin/activate`
 * `alias-free-torch` is someone else's repo implementing alias-free-gan
 * `logs` contains all logs from CS grid jobs. I have a document detailing the purpose of each job. In order for a job to output its log here, you must cd into logs before running the job
 * 
+
+## Misc
+Google's model now outputs depth inversely of ours. This was not originally the case, so we must have changed something but we haven't been able to track it down. For comparison we just invert their depth. 
+
+Overfitting can be very helpful to check if a model is working. We have several small training sets that can be used. Currently in `train_from_scratch.py`, the train and test list are set manually. There is an example of an overfit:
+
+`video_list = 'test_data/small_train_list_grid.txt'
+test_video_list = 'test_data/small_test_list_grid.txt'`
 
 
 ## End
