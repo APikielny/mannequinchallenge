@@ -1,6 +1,6 @@
 # Consistent Depth Estimation for Video
 
-## Very Quick Start
+## Very Quick Start Guide
 
 A very quick guide to run inference:
 ```
