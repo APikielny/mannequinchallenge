@@ -7,6 +7,29 @@ Here is a link to my thesis [presentation](https://docs.google.com/presentation/
 
 I have moved the original README to `README_Google.md`. This README now contains an effort to document our code. 
 
+## Setup
+
+This section was copied from Google's README, now at `README_Google.md`.
+
+The code is based on PyTorch. The code has been tested with PyTorch 1.1 and Python 3.6. 
+
+We recommend setting up a `virtualenv` environment for installing PyTorch and
+the other necessary Python packages. The [TensorFlow installation
+guide](https://www.tensorflow.org/install/pip) may be helpful (follow steps 1
+and 2) or follow the `virtualenv` documentation.
+
+Once your environment is set up and activated, install the necessary packages:
+
+```
+(pytorch)$ pip install torch torchvision scikit-image h5py
+```
+
+The model checkpoints are stored on Google Cloud and may be retrieved by running:
+
+```
+(pytorch)$ ./fetch_checkpoints.sh
+```
+
 ## Important Files in mannequinchallenge
 
 This is a non-exhaustive list of important python files and folders that we changed and will likely change further.
