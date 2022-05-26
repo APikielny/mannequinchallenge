@@ -4,7 +4,7 @@
 
 A very quick guide to using this code: 
 1. If freshly cloning this repo, go to the Setup section first.
-2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model.
+2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab.
 
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
