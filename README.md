@@ -1,5 +1,11 @@
 # Consistent Depth Estimation for Video
 
+## Quick Start
+
+A very quick guide to using this code: 
+1. If freshly cloning this repo, go to the Setup section first.
+2. Use the test_mannequin_on_grid.sh script to test the model.
+
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
 
