@@ -56,7 +56,7 @@ def create_kernel(img_width, radial=False):
     width=in_half_width*2
 
     #cutoff, defined as f_c (in paper and code)
-    #paper says f_c is s/2 for critical sampling, then moves to s/2 - f_h for non critical sampling
+    #alias-free says f_c is s/2 for critical sampling, then moves to s/2 - f_h for non critical sampling
     # cutoff = s / 2
     cutoff = s / 2 - in_half_width
 

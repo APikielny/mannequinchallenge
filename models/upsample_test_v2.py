@@ -140,6 +140,13 @@ def downsample_testing(img):
     save_image(blurred/255, "test_img/downsampling/downsampled_baker_with_sinc_sinc_filter_scipy_check.png")
     return
 
+def downsample_testing_torch_downsample_func(img):
+    img_reshaped = torch.unsqueeze(img, 0).float()
+    downsampled = torch.nn.functional.interpolate(img_reshaped,  scale_factor=1/2, mode='bilinear', align_corners=False, recompute_scale_factor=None, antialias=False)
+
+    save_image(downsampled/255, "test_img/downsampling/downsampled_baker_torch_nn_function_interpolation_anti_alias.png")
+    return
+
 #bw working version
 # def downsample_testing_torch(img):
 #     downsampled = my_downsample(img).cpu()[0, :, :].float()
@@ -229,4 +236,14 @@ img = torchvision.io.read_image("test_img/small_baker.png").cuda() #, mode=torch
 
 # upsample_testing(img)
 # downsample_testing_torch(img)
-upsample_testing_torch(img)
+# upsample_testing_torch(img)
+downsample_testing_torch_downsample_func(img)
+
+##### generating visualization of kernel
+# kernel = create_kernel(50, True)
+# # print(torch.sum(kernel[kernel < 0]))
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# ax = sns.heatmap(kernel, annot=True, fmt='.2f')
+# plt.show()
+# plt.savefig("not_radial_heatmap_non_crit_sampling_annotate.png")

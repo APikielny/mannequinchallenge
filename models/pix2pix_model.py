@@ -89,7 +89,7 @@ class Pix2PixModel(base_model.BaseModel):
                 '======================================  DIW NETWORK TRAIN FROM %s======================='
                 % self.mode)
 
-            new_model = hourglass.HourglassModel(self.num_input)
+            new_model = hourglass.HourglassModel(self.num_input, opt.anti_alias_upsample, opt.anti_alias_downsample, _isTrain)
 
             print(
                 '===================Loading Pretrained Model OURS ==================================='

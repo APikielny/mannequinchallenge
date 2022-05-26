@@ -148,5 +148,7 @@ def visualize(visualisation_feature_map, input_, videoType, frameName, model_wei
                 os.makedirs(folder_path)
 
             cv2.imwrite(os.path.join(folder_path, frameName + ".png"), img)
-
+    print("Wrote latent space visualization. Exiting.")
+    quit()
+    print("Exited.") #(shouldn't print)
     return
