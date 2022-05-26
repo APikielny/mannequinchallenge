@@ -1,6 +1,6 @@
 # Consistent Depth Estimation for Video
 
-## Very Quick Start Guide
+### Very Quick Start Guide
 
 A very quick guide to run inference:
 ```
@@ -8,7 +8,7 @@ cd {path_to_this_repo}
 qsub -cwd -l gpus=1 -m abes grid_bash_scripts/test_mannequin_on_grid.sh
 ```
 
-## A Slightly Longer Start Guide
+### A Slightly Longer Start Guide
 1. If freshly cloning this repo, go to the Setup section first.
 2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run the command specified above. The model can be set in the bash script (ignore the "_net_G.pth" part), and must exist in the `checkpoints/` folder ahead of time. If this folder doesn't exist, you can use `./fetch_checkpoints.sh` (to get Google's) or find them at `/data/jhtlab/apikieln/checkpoints` (models we have trained throughout the year)
 
