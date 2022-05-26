@@ -62,7 +62,7 @@ Scripts to generate video also output here, and there are also text files contai
 
 
 ## Bash Scripts:
-All the bash scripts I wrote to run on grid should be stored in mannequinchallenge/grid_bash_scripts. Preivously, they were free-floating in /data/jhtlab/apikieln, so if something is breaking now it is probably a paths issue.
+All the bash scripts I wrote to run on grid should be stored in mannequinchallenge/grid_bash_scripts. Previously, they were free-floating in /data/jhtlab/apikieln, so if something is breaking now it is probably a paths issue.
 
 Some bash scripts are accompanied by a plain text file that shows exactly how to run it. This isn't necessary, but it was helpful for me when switching between scripts. For example, for `test_mannequin_on_grid.sh`, run `cat test_grid_command` to see the command I use, and copy/paste that to trigger `test_mannequin_on_grid.sh` to run on grid. The `-m abes` flag will email grid job status updates. I believe this just emails whoever submitted the job. Tip: I created a filter in my mail app to prevent these emails from flooding my inbox. 
 
