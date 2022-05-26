@@ -3,6 +3,8 @@
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
 
+Here is a link to my thesis [presentation]([https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit#slide=id.g35f391192_00](https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit?usp=sharing)) and [document](https://drive.google.com/file/d/1jF-IOYivDaL0aoN6qJj5AdSrNxRsgSzf/view?usp=sharing) (please request access if necessary, or email me).
+
 I have moved the original README to `README_Google.md`. This README now contains an effort to document our code. 
 
 ## Important Files in mannequinchallenge
