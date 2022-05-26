@@ -5,7 +5,8 @@
 A very quick guide to using this code: 
 1. If freshly cloning this repo, go to the Setup section first.
 2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can run:
-```cd /data/jhtlab/apikieln/logs
+```
+cd /data/jhtlab/apikieln/logs
 qsub -cwd -l gpus=1 -m abes /data/jhtlab/apikieln/mannequinchallenge/grid_bash_scripts/test_mannequin_on_grid.sh
 ```
 
