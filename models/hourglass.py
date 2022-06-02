@@ -396,40 +396,58 @@ class GaussianFourierFeatureTransform(torch.nn.Module):
         return torch.cat([torch.sin(x), torch.cos(x)], dim=1)
 
 class HourglassModel(nn.Module):
-    def __init__(self, num_input, use_1x1_conv, scale, anti_alias_upsample, anti_alias_downsample, _isTrain):
+    def __init__(self, num_input, use_1x1_conv, scale, anti_alias_upsample, anti_alias_downsample, _isTrain, useFourier):
         super(HourglassModel, self).__init__()
+        self.useFourier = useFourier
+        print("Set useFourier variable.")
+        print("Num input: ", num_input)
 
-        # Hyperparameters for fourier features
-        self.mapping_size = 128
-        self.scale = scale
-        self.fourier_feature_transform = GaussianFourierFeatureTransform(5, self.mapping_size, self.scale)
+        if self.useFourier:
+            # Hyperparameters for fourier features
+            self.mapping_size = 128
+            self.scale = scale
+            self.fourier_feature_transform = GaussianFourierFeatureTransform(5, self.mapping_size, self.scale)
 
-        # TODO: Switching to 1x1 Convolutions Works Currently, Just Testing
-        # - I double feature maps for inception base 1x1 layer, which maybe isn't needed?
-        # - Using inception with only 1x1 convolution may be unnecessary/weird? Research more about inception purpose
-        # - Parameters overall decreased so can maybe switch mapping size to 256
-        # Some more overfitting + learning rate type tests, feels weird to compare because parameter count is smaller by factor 2x
-        # TODO: (Maybe) Switch from doubling feature maps to something smarter especially for >3 kernel size 
-        if use_1x1_conv:
-            self.seq = nn.Sequential(
-                nn.Conv2d(self.mapping_size * 2, 256, 1, padding = 0), 
-                nn.BatchNorm2d(256),
-                nn.ReLU(True),
-                Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample), 
-            )
+            # TODO: Switching to 1x1 Convolutions Works Currently, Just Testing
+            # - I double feature maps for inception base 1x1 layer, which maybe isn't needed?
+            # - Using inception with only 1x1 convolution may be unnecessary/weird? Research more about inception purpose
+            # - Parameters overall decreased so can maybe switch mapping size to 256
+            # Some more overfitting + learning rate type tests, feels weird to compare because parameter count is smaller by factor 2x
+            # TODO: (Maybe) Switch from doubling feature maps to something smarter especially for >3 kernel size 
+            #this should be specified with a fourier-features frequency.
+            #using 1x1s without fourier features doesn't make sense because then there is no positional encoding
+            if use_1x1_conv: 
+                self.seq = nn.Sequential(
+                    nn.Conv2d(self.mapping_size * 2, 256, 1, padding = 0), 
+                    nn.BatchNorm2d(256),
+                    nn.ReLU(True),
+                    Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample), 
+                )
 
-            uncertainty_layer = [
-                nn.Conv2d(128, 1, 1, padding=0), torch.nn.Sigmoid()]
-            self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
-            self.pred_layer = nn.Conv2d(128, 1, 1, padding=0)
+                uncertainty_layer = [
+                    nn.Conv2d(128, 1, 1, padding=0), torch.nn.Sigmoid()]
+                self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
+                self.pred_layer = nn.Conv2d(128, 1, 1, padding=0)
+            else:
+                self.seq = nn.Sequential(
+                    # nn.Conv2d(num_input, 128, 7, padding=3),
+                    # nn.Conv2d(5, 128, 7, padding = 3), # For r,g,b,x,y input
+                    nn.Conv2d(self.mapping_size * 2, 128, 7, padding = 3), 
+                    nn.BatchNorm2d(128),
+                    nn.ReLU(True),
+                    Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
+                )
+
+                uncertainty_layer = [
+                    nn.Conv2d(64, 1, 3, padding=1), torch.nn.Sigmoid()]
+                self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
+                self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
         else:
             self.seq = nn.Sequential(
-                # nn.Conv2d(num_input, 128, 7, padding=3),
-                # nn.Conv2d(5, 128, 7, padding = 3), # For r,g,b,x,y input
-                nn.Conv2d(self.mapping_size * 2, 128, 7, padding = 3), 
-                nn.BatchNorm2d(128),
-                nn.ReLU(True),
-                Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
+            nn.Conv2d(num_input, 128, 7, padding=3),
+            nn.BatchNorm2d(128),
+            nn.ReLU(True),
+            Channels4(use_1x1_conv, anti_alias_upsample, anti_alias_downsample),
             )
 
             uncertainty_layer = [
@@ -437,15 +455,26 @@ class HourglassModel(nn.Module):
             self.uncertainty_layer = torch.nn.Sequential(*uncertainty_layer)
             self.pred_layer = nn.Conv2d(64, 1, 3, padding=1)
 
-    def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
 
+
+    def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
+        print("hourglass forward pass")
+        print("useFourier: ", self.useFourier)
         split = targets['img_1_path'][0].split('/')
         frameName = split[-1][:-4]
         videoType = split[-2]
+        print("Split.")
 
-        # X,Y Grid Concat Logic Moved to Data Loader
-        ff_input = self.fourier_feature_transform(input_)
-        pred_feature = self.seq(ff_input)
+        if self.useFourier:
+            # X,Y Grid Concat Logic Moved to Data Loader
+            ff_input = self.fourier_feature_transform(input_)
+            pred_feature = self.seq(ff_input)
+        else:
+            print("Calling self.seq")
+            print("Input size: ", input_.shape)
+            pred_feature = self.seq(input_)
+
+        print("hourglass forward pass, got pred feature")
 
         pred_d = self.pred_layer(pred_feature)
         pred_confidence = self.uncertainty_layer(pred_feature)
@@ -456,5 +485,6 @@ class HourglassModel(nn.Module):
         if (latentOutput):
             latent = list(visualisation_feature_map.values())[1][0,:,:,:]
             return latent
+        print("hourglass forward pass, returning")
 
         return pred_d, pred_confidence

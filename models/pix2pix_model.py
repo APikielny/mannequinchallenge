@@ -68,7 +68,7 @@ class Pix2PixModel(base_model.BaseModel):
     def name(self):
         return 'Pix2PixModel'
 
-    def __init__(self, opt, _isTrain=False):
+    def __init__(self, opt, _isTrain=False, useFourier=False):
         self.initialize(opt)
         self.weights = opt.weights
         # self.latent_constraint_weight = 1e-1
@@ -89,7 +89,7 @@ class Pix2PixModel(base_model.BaseModel):
                 '======================================  DIW NETWORK TRAIN FROM %s======================='
                 % self.mode)
 
-            new_model = hourglass.HourglassModel(self.num_input, opt.use_1x1_conv, opt.scale, opt.anti_alias_upsample, opt.anti_alias_downsample, _isTrain)
+            new_model = hourglass.HourglassModel(self.num_input, opt.use_1x1_conv, opt.scale, opt.anti_alias_upsample, opt.anti_alias_downsample, _isTrain, useFourier)
 
             print(
                 '===================Loading Pretrained Model OURS ==================================='
@@ -805,6 +805,8 @@ class Pix2PixModel(base_model.BaseModel):
         input_imgs = autograd.Variable(input_.cuda(), requires_grad=False)
 
         stack_inputs = input_imgs
+
+        print("Input shape in run and save: ", input_.shape)
 
         # self.netG.forward has weights as the last input 
         # I removed it idk if was leftover from something else?

@@ -37,7 +37,7 @@ k = 16/BATCH_SIZE
 # BATCH_SIZE = 1
 # k = 1
 
-def save_interim_results_func(epoch_num):
+def save_interim_results_func(epoch_num, useFourier):
     # print("Saving interim model to ", '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
     # torch.save(model.netG.module.cpu().state_dict(),
     #    '/data/jhtlab/apikieln/checkpoints/test_local/' + save_weights + "_epoch_" + str(epoch) + '_net_G.pth')
@@ -47,7 +47,10 @@ def save_interim_results_func(epoch_num):
     print('save_path %s' % save_path)
     
     print("Testing current model.")
-    test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
+    if useFourier:
+        test_video_data_loader = aligned_data_loader.DAVISFourierDataLoader(test_video_list, BATCH_SIZE)
+    else:
+        test_video_data_loader = aligned_data_loader.DAVISDataLoader(test_video_list, BATCH_SIZE)
     test_video_dataset = test_video_data_loader.load_data()
 
     for j, data_test in enumerate(test_video_dataset):
@@ -64,19 +67,30 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 # video_list = 'test_data/single_pair_2.txt' #for viewing masks
 # video_list = "test_data/temp_list_5.txt"
 
-video_list = 'test_data/full_train_list_grid.txt'
-test_video_list = 'test_data/test_list_grid_adam_translate.txt'
+# video_list = 'test_data/full_train_list_grid.txt'
+# test_video_list = 'test_data/test_list_grid_adam_translate.txt'
 
 #for overfitting to one example:
-# video_list = 'test_data/small_train_list_grid.txt'
-# test_video_list = 'test_data/small_test_list_grid.txt'
+video_list = 'test_data/small_train_list_grid.txt'
+test_video_list = 'test_data/small_test_list_grid.txt'
 
+#determine whether or not to use fourier features, based on if we received a scale frequency or not
+useFourier = False
+if opt.scale is not None:
+    useFourier = True
+    print("Using fourier features!")
+else:
+    print("Not using fourier features.")
 
 eval_num_threads = 2
 # video_data_loader = aligned_data_loader.DAVISDataLoader(video_list, BATCH_SIZE)
 # video_dataset = video_data_loader.load_data()
 # NOTE: Pick data loader based on whether next frame needed (ex. for latent constraints)
-video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
+if useFourier:
+    video_data_loader = aligned_data_loader.SupervisionFourierDataLoader(video_list, BATCH_SIZE)
+else:
+    video_data_loader = aligned_data_loader.SupervisionDataLoader(video_list, BATCH_SIZE)
+
 # video_data_loader = aligned_data_loader.SupervisionLatentDataLoader(video_list, BATCH_SIZE)
 video_dataset = video_data_loader.load_data()
 print('========================= Video dataset #images = %d =========' %
@@ -84,11 +98,10 @@ print('========================= Video dataset #images = %d =========' %
 
 if opt.train_from_scratch:
     print("Training from scratch!")
-    model = pix2pix_model.Pix2PixModel(opt, True)
+    model = pix2pix_model.Pix2PixModel(opt, True, useFourier)
 else:
     print("Not training from scratch!")
-    model = pix2pix_model.Pix2PixModel(opt, False)
-# model = pix2pix_model.Pix2PixModel(opt) #TODO change back to True for train from scratch!
+    model = pix2pix_model.Pix2PixModel(opt, False, useFourier)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
@@ -114,7 +127,7 @@ latent_loss_list = []
 supervision_loss_list = []
 
 if save_interim_results:
-    save_interim_results_func("pre_train")
+    save_interim_results_func("pre_train", useFourier)
 
 for epoch in range(max_epochs):
     latent_loss_accum = 0
@@ -143,7 +156,7 @@ for epoch in range(max_epochs):
     #TODO
     #instead of saving interim models, can just run an evaluating/test script on the current model and save it somewhere. Would save a step.
     if save_interim_results:
-        save_interim_results_func(epoch)
+        save_interim_results_func(epoch, useFourier)
     
     if epoch % 10 == 0:
         torch.save(model.netG.module.cpu().state_dict(),
