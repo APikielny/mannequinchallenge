@@ -458,23 +458,17 @@ class HourglassModel(nn.Module):
 
 
     def forward(self, input_, targets, boolVisualize = False, latentOutput = False):
-        print("hourglass forward pass")
-        print("useFourier: ", self.useFourier)
         split = targets['img_1_path'][0].split('/')
         frameName = split[-1][:-4]
         videoType = split[-2]
-        print("Split.")
 
         if self.useFourier:
             # X,Y Grid Concat Logic Moved to Data Loader
             ff_input = self.fourier_feature_transform(input_)
             pred_feature = self.seq(ff_input)
         else:
-            print("Calling self.seq")
-            print("Input size: ", input_.shape)
             pred_feature = self.seq(input_)
 
-        print("hourglass forward pass, got pred feature")
 
         pred_d = self.pred_layer(pred_feature)
         pred_confidence = self.uncertainty_layer(pred_feature)
@@ -485,6 +479,5 @@ class HourglassModel(nn.Module):
         if (latentOutput):
             latent = list(visualisation_feature_map.values())[1][0,:,:,:]
             return latent
-        print("hourglass forward pass, returning")
 
         return pred_d, pred_confidence

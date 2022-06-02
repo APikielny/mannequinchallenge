@@ -806,8 +806,6 @@ class Pix2PixModel(base_model.BaseModel):
 
         stack_inputs = input_imgs
 
-        print("Input shape in run and save: ", input_.shape)
-
         # self.netG.forward has weights as the last input 
         # I removed it idk if was leftover from something else?
         prediction_d, pred_confidence = self.netG.forward(
