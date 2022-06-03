@@ -782,23 +782,23 @@ class Pix2PixModel(base_model.BaseModel):
         return self.latent_loss, self.loss_joint
 
     #no longer using this function
-    def depth_and_latent_train(self, input_list, targets_list):
-        latent1 = self.get_latent(input_list[0], targets_list[0])
-        latent2 = self.get_latent(input_list[1], targets_list[1])
+    # def depth_and_latent_train(self, input_list, targets_list):
+    #     latent1 = self.get_latent(input_list[0], targets_list[0])
+    #     latent2 = self.get_latent(input_list[1], targets_list[1])
 
-        print("Constraining between: ", targets_list[0]['img_1_path'][0].split(
-            '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
+    #     print("Constraining between: ", targets_list[0]['img_1_path'][0].split(
+    #         '/')[-2:], targets_list[1]['img_1_path'][0].split('/')[-2:])
 
-        # just using L2 loss between the two latents for now
-        loss = self.L2(latent1, latent2)
-        # print("loss: ", loss)
+    #     # just using L2 loss between the two latents for now
+    #     loss = self.L2(latent1, latent2)
+    #     # print("loss: ", loss)
 
-        # taken from optimize_parameters
-        #####
-        self.optimizer_G.zero_grad()
-        # self.backward_G(0) #TODO check n_iters
-        loss.backward()
-        self.optimizer_G.step()
+    #     # taken from optimize_parameters
+    #     #####
+    #     self.optimizer_G.zero_grad()
+    #     # self.backward_G(0) #TODO check n_iters
+    #     loss.backward()
+    #     self.optimizer_G.step()
 
     def run_and_save_DAVIS(self, input_, targets, save_path, visualize):
         assert (self.num_input == 3)

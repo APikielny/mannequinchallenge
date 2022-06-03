@@ -138,7 +138,8 @@ for epoch in range(max_epochs):
         # model.depth_train(img, target)
         print("Batch index - ", i, " Epoch - ", epoch)
         model.depth_train(i, img, target, num_batches, k)
-        # supervision_loss = model.depth_and_latent_train_v2(i, img, target, num_batches, k)
+        # use depth_and_latent_train_v2 to add the latent constraint. I'm keeping the code separate because this requires a latent loader which is slow. 
+        # model.depth_and_latent_train_v2(i, img, target, num_batches, k)
         
         # if (i%10000 == 0):
         #     counter += 1
