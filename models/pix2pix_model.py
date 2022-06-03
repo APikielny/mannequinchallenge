@@ -781,7 +781,7 @@ class Pix2PixModel(base_model.BaseModel):
         
         return self.latent_loss, self.loss_joint
 
-
+    #no longer using this function
     def depth_and_latent_train(self, input_list, targets_list):
         latent1 = self.get_latent(input_list[0], targets_list[0])
         latent2 = self.get_latent(input_list[1], targets_list[1])

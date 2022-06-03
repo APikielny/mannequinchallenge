@@ -1,0 +1,2 @@
+cd logs
+qsub -cwd -l gpus=1 -m abes ../alias_free_test_mannequin_on_grid.sh

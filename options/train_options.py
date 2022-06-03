@@ -90,7 +90,7 @@ class TrainOptions(BaseOptions):
                                 
 
         self.parser.add_argument('--use_1x1_conv', action="store_true",
-                                help="use 1x1 convolutions to achieve rotational equivariance")
+                                help="use 1x1 convolutions to achieve rotational equivariance. If passing this flag, MUST also pass a --scale to enable Fourier features")
         self.parser.add_argument('--scale', type=float,
                                 help="scale/sampling frequency to use for Gaussian Fourier Features. If not specified, don't use Fourier Features.")
         self.parser.add_argument('--anti_alias_upsample', action="store_true",
