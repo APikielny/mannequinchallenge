@@ -1,16 +1,18 @@
 # Consistent Depth Estimation for Video
 
+Look at the default branch (alias-fourier-merge at the time I am writing this) for the most updated code and README.md.
+
 ### Very Quick Start Guide
 
-A very quick guide to run inference:
+A very quick guide to run inference ([on the Brown CS Grid](https://cs.brown.edu/about/system/services/hpc/gridengine/)):
 ```
 cd {path_to_this_repo}
 qsub -cwd -l gpus=1 -m abes grid_bash_scripts/test_mannequin_on_grid.sh
 ```
 
-### A Slightly Longer Start Guide
-1. If freshly cloning this repo, go to the Setup section first.
-2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run the command specified above. The model can be set in the bash script (ignore the "_net_G.pth" part), and must exist in the `checkpoints/` folder ahead of time. If this folder doesn't exist, you can use `./fetch_checkpoints.sh` (to get Google's) or find them at `/data/jhtlab/apikieln/checkpoints` (models we have trained throughout the year)
+### Slightly Longer Start Guide
+1. If freshly cloning this repo, go to the Setup section first, to install necessary dependencies. We create a virtual environment, which is activated in most of the bash scripts. 
+2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run the qsub command specified above. The model can be set in the bash script (ignore the "_net_G.pth" part), and must exist in the `checkpoints/` folder ahead of time. If this folder doesn't exist, you can use `./fetch_checkpoints.sh` (to get Google's) or find them at `/data/jhtlab/apikieln/checkpoints` (models we have trained throughout the year)
 
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
@@ -21,7 +23,7 @@ I have moved the original README to `README_Google.md`. This README now contains
 
 ## Setup
 
-This section was copied from Google's README, now at `README_Google.md`.
+This section was copied from Google's README, now at `README_Google.md`. It details the necessary dependencies. We install this dependencies in a virtual environment, which we activate in our bash scripts. 
 
 The code is based on PyTorch. The code has been tested with PyTorch 1.1 and Python 3.6. 
 
@@ -36,7 +38,7 @@ Once your environment is set up and activated, install the necessary packages:
 (pytorch)$ pip install torch torchvision scikit-image h5py
 ```
 
-The model checkpoints are stored on Google Cloud and may be retrieved by running:
+The model checkpoints (these are Google's model checkpoints, not ours. Ours are stored at `/data/jhtlab/apikieln/checkpoints`) are stored on Google Cloud and may be retrieved by running:
 
 ```
 (pytorch)$ ./fetch_checkpoints.sh
@@ -92,7 +94,7 @@ source ./venv-mannequin/bin/activate`
 
 
 ## Misc
-Google's model now outputs depth inversely of ours. This was not originally the case, so we must have changed something but we haven't been able to track it down. For comparison we just invert their depth. 
+Google's model now outputs depth inversely of ours. This was not originally the case, so we must have changed something but we haven't been able to track it down. For comparison we just invert (1.0-depth) their depth. 
 
 Overfitting can be very helpful to check if a model is working. We have several small training sets that can be used. Currently in `train_from_scratch.py`, the train and test list are set manually. There is an example of an overfit:
 
