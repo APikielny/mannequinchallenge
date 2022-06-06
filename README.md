@@ -13,9 +13,9 @@ qsub -cwd -l gpus=1 -m abes grid_bash_scripts/test_mannequin_on_grid.sh
 2. Use the grid_bash_scripts/test_mannequin_on_grid.sh script to test the model. You will need a GPU, which can be specified on the Brown CS Grid or most computers in the Visual Computing Lab. If you are using grid, you can simply run the qsub command specified above. The model can be set in the bash script (ignore the "_net_G.pth" part), and must exist in the `checkpoints/` folder ahead of time. If this folder doesn't exist, you can use `./fetch_checkpoints.sh` (to get Google's) or find them at `/data/jhtlab/apikieln/checkpoints` (models we have trained throughout the year)
 
 ## Overview
-This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Different branches of this repo (TODO, hopefully we will combine these) contain latent regularization, anti-aliased sampling, and fourier features techniques towards this goal. 
+This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Throughout the year, we used different branches of this repo for latent regularization (`train-from-scratch`), anti-aliased sampling (`anti-alias`), and fourier features (`fourier-features`) towards this goal. These branches have now been combined into `alias-fourier-merge` (TODO, name may change). We have kept the old branches around just in case. 
 
-Here is a link to my (Adam's) thesis [presentation](https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit#slide=id.g35f391192_00) and [document](https://drive.google.com/file/d/1jF-IOYivDaL0aoN6qJj5AdSrNxRsgSzf/view?usp=sharing) (please request access if necessary, or email me).
+Here is a link to my (Adam's) thesis [presentation](https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit#slide=id.g35f391192_00) and [document](https://drive.google.com/file/d/1jF-IOYivDaL0aoN6qJj5AdSrNxRsgSzf/view?usp=sharing) (please request access if necessary or email me).
 
 I have moved the original README to `README_Google.md`. This README now contains an effort to document our code. 
 
@@ -50,7 +50,7 @@ This is a non-exhaustive list of important python files and folders that we chan
 * `grid_bash_scripts/` (discussed in Bash Scripts section), scripts to run stuff on grid, such as training, testing, etc. 
 * `loaders/`: loads data into model. We have different data loaders for different models. Discussed further in bash scripts section.
 * `models/`: very important. This is where the model architecture is defined
-    - We mainly modify pix2pixmodel and hourglass. Pix2pix is directly called by the training code (`train_from_scratch.py`). It contains the loss functions, optimizer, etc. The actual model architecture is defined in `hourglass.py`. Hourglass is where we change things like sampling and fourier features. 
+    - We mainly modify pix2pixmodel and hourglass. Pix2pix is directly called by the training code (`train_from_scratch.py`) (Note that train_from_scratch.py is confusingly named; it can actually be used to fine-tune as well. TODO). It contains the loss functions, optimizer, etc. The actual model architecture is defined in `hourglass.py`. Hourglass is where we change things like sampling and fourier features. 
     - `resample_v2.py` contains our new sampling filters. The fourier features code is baked directly into `hourglass.py`. 
     - The upsample test files are not actually used by the model but are helpful for testing new sampling filters. 
 * `options/train_options.py`: flags to pass when training. Below the line #Added by Adam is stuff that was added this year. See bash scripts for examples of using these flags. 
@@ -68,7 +68,7 @@ Some bash scripts are accompanied by a plain text file that shows exactly how to
 
 Here are the scripts:
 * `test_mannequin_on_grid.sh` and `test_grid_command`: run inference on a given model. Right now, the dataset can't be specified here and must be done manually (TODO I think I have this functionality in other inference functions though?)
-* `train_mannequin_on_grid.sh` and `train_grid_command`: train a model. Dataset must still be specified in train_from_scratch.py. (TODO name of python file is confusing because it doesn't always train from scratch.) Other options can be specified on command line, such as epochs, batch size, etc. See `mannequinchallenge/options/train_options.py` for full list of options. 
+* `train_mannequin_on_grid.sh` and `train_grid_command`: train a model. Dataset must still be specified in train_from_scratch.py.  Other options can be specified on command line, such as epochs, batch size, etc. See `mannequinchallenge/options/train_options.py` for full list of options. There are still several other training scripts lying around (`fourier_features_train_mannequin_on_grid.sh`), etc. They all point to different repos and show examples of flags for different model configurations. Ideally going forward, only one training script is necessary, but I am leaving these in for reference. 
 * `L2_consistency_metric_script.sh` measure consistency of a model. This script doesn't require grid! You can simply call bash L2_... You can specify the data to use. However, this requires that data (output images) already be generated. Also, currently this only measures one video/set of frames at a time, but I think it would be better to measure it for a whole dataset and then take an average. The script outputs an image to `Consistency_Metrics/` showing the difference between each pair of frames. The top has the average difference, which is what we use. 
 * `alias_free_L2_consistency_metric_script.sh` TODO I think this script is no longer necessary? 
 * `visualize_mannequin_on_grid.sh`: PCA latent visualization of a model. Make sure the proper flags are passed to test_davis_videos.py so that the right model architecture is used when loading! For example, specify if using anti-alias upsampling or downsampling, fourier features, etc.
@@ -89,6 +89,8 @@ source ./venv-mannequin/bin/activate`
 * `checkpoints` contains saved models. This could be moved within the repo. If so, don't push it. 
 * `alias-free-torch` is someone else's repo implementing alias-free-gan
 * `logs` contains all logs from CS grid jobs. I have a document detailing the purpose of each job I have run, that I can pass along if it would be helpful. In order for a job to output its log here, you must cd into logs before running the job
+* `all_output_data` consolidates test_data folders from the different branches we used this year.
+* `mannequinchallenge`, `alias-free-mannequinchallenge`, `fourier-features-mannequin` are the repo branches/dirs we used this year. We are saving them just in case, but they shouldn't be used. 
 
 
 ## Misc
@@ -98,6 +100,8 @@ Overfitting can be very helpful to check if a model is working. We have several 
 
 `video_list = 'test_data/small_train_list_grid.txt'
 test_video_list = 'test_data/small_test_list_grid.txt'`
+
+The code for latent constraining must be changed manually, instead of using flags. This is mainly because the latent data loader is much slower, and we haven't worked on this code in a while. To use latent constraining, change the data loader and change the depth_train() function to depth_and_latent_train_v2(). Also, constraining latent space while also using fourier features would require some more changes to create a data loader that loads in multiple frames and also fourier feature maps the inputs. This would be very data intensive but should be relatively straightforward to code. 
 
 
 ## End
