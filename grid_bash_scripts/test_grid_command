@@ -1,0 +1,2 @@
+cd /data/jhtlab/apikieln/logs
+qsub -cwd -l gpus=1 -m abes /data/jhtlab/apikieln/mannequinchallenge/grid_bash_scripts/test_mannequin_on_grid.sh

@@ -1,3 +1,5 @@
+Look at the default branch (alias-fourier-merge at the time I am writing this) for the most updated code and README.md.
+
 # Mannequin Challenge Code and Trained Models
 
 This repository contains inference code for models trained on the Mannequin
