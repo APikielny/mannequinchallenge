@@ -89,7 +89,7 @@ source ./venv-mannequin/bin/activate`
 * `checkpoints` contains saved models. This could be moved within the repo. If so, don't push it. 
 * `alias-free-torch` is someone else's repo implementing alias-free-gan
 * `logs` contains all logs from CS grid jobs. I have a document detailing the purpose of each job I have run, that I can pass along if it would be helpful. In order for a job to output its log here, you must cd into logs before running the job
-* `all_output_data` consolidates test_data folders from the different branches we used this year.
+* `all_output_data` consolidates test_data folders from the different branches we used this year. This is a backup of the folders in the old repos and should not be deleted.
 * `mannequinchallenge`, `alias-free-mannequinchallenge`, `fourier-features-mannequin` are the repo branches/dirs we used this year. We are saving them just in case, but they shouldn't be used. 
 
 
