@@ -15,7 +15,7 @@ qsub -cwd -l gpus=1 -m abes grid_bash_scripts/test_mannequin_on_grid.sh
 ## Overview
 This repo contains the implementation of the Consistent Depth Estimation for Video project, written by Marc Mapeke and Adam Pikielny. Our goal is to improve temporal consistency of depth maps. We start with Google's MannequinChallenge work. Throughout the year, we used different branches of this repo for latent regularization (`train-from-scratch`), anti-aliased sampling (`anti-alias`), and fourier features (`fourier-features`) towards this goal. These branches have now been combined into `alias-fourier-merge` (TODO, name may change). We have kept the old branches around just in case. 
 
-Here is a link to my (Adam's) thesis [presentation](https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit#slide=id.g35f391192_00) and [document](https://drive.google.com/file/d/1jF-IOYivDaL0aoN6qJj5AdSrNxRsgSzf/view?usp=sharing) (please request access if necessary or email me).
+Here is a link to my (Adam's) thesis [presentation slides](https://docs.google.com/presentation/d/1_0Mgygl7-zHsIIfYkqIjycVZTPjHw3pGgcbOI6KdYis/edit#slide=id.g35f391192_00), [presentation recording](https://drive.google.com/file/d/14CZa9MOJgSJy3wOWBA54wfZDzYIPvHPq/view?usp=sharing), and [document](https://drive.google.com/file/d/1jF-IOYivDaL0aoN6qJj5AdSrNxRsgSzf/view?usp=sharing) (please request access if necessary or email me).
 
 I have moved the original README to `README_Google.md`. This README now contains an effort to document our code. 
 
